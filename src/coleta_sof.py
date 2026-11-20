@@ -104,9 +104,26 @@ def coletar_empenhos(token: str, ano: int, mes: int, orgao: str, max_paginas: in
         pagina += 1
         time.sleep(0.3)                          # gentileza com o servidor
     for l in linhas:
-        if "numCpfCnpj" in l:
-            l["numCpfCnpj"] = mascarar_cpf(l["numCpfCnpj"])
+        anonimizar(l)
     return linhas
+
+
+_RE_MEI = re.compile(r"^\s*\d{8}\s+\D")
+
+
+def anonimizar(l: dict) -> dict:
+    """LGPD, antes de gravar qualquer arquivo: CPF mascarado; nome de pessoa física e do
+    titular de MEI (razão social = 8 dígitos do CNPJ + nome da pessoa) substituídos."""
+    doc = re.sub(r"\D", "", str(l.get("numCpfCnpj") or ""))
+    if "numCpfCnpj" in l:
+        l["numCpfCnpj"] = mascarar_cpf(l["numCpfCnpj"])
+    for campo in ("txtRazaoSocial", "nomCredor", "txtCredor"):
+        if campo in l:
+            if len(doc) != 14:
+                l[campo] = "[pessoa física]"
+            elif _RE_MEI.match(str(l[campo] or "")):
+                l[campo] = "[microempreendedor individual]"
+    return l
 
 
 def main():
