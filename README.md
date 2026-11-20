@@ -36,7 +36,7 @@ Projeto pessoal com dados abertos; não representa posição oficial da PMSP. Ne
 
 ## Licença e citação
 
-Código sob [MIT](LICENSE). Dados tratados, site, figuras e textos sob [CC BY 4.0](LICENSE-DATA.md). Para citar, use o arquivo [`CITATION.cff`](CITATION.cff) (botão "Cite this repository" no GitHub) ou o DOI de todas as versões [10.5281/zenodo.24399304](https://doi.org/10.5281/zenodo.24399304) (v0.1.0: [10.5281/zenodo.24399305](https://doi.org/10.5281/zenodo.24399305)).
+Código sob [MIT](LICENSE). Dados tratados, site, figuras e textos sob [CC BY 4.0](LICENSE-DATA.md). Para citar, use o arquivo [`CITATION.cff`](CITATION.cff) (botão "Cite this repository" no GitHub) ou o DOI de todas as versões [10.5281/zenodo.24399304](https://doi.org/10.5281/zenodo.24399304) (v0.1.0: [10.5281/zenodo.24399305](https://doi.org/10.5281/zenodo.24399305)). Base tratada (dataset, CC BY 4.0): [10.5281/zenodo.24399591](https://doi.org/10.5281/zenodo.24399591).
 
 ---
 

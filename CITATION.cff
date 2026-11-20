@@ -6,10 +6,18 @@ authors:
     given-names: Amilcar Ferraz
     orcid: "https://orcid.org/0009-0000-5263-4919"
     affiliation: "LAB_MicaDataWise"
-version: "0.1.0"
+version: "0.1.1"
 date-released: 2026-11-20
 license: MIT
 doi: "10.5281/zenodo.24399304"
 url: "https://micadw.github.io/dsa-orcamento-cultura-sp/"
 repository-code: "https://github.com/micadw/dsa-orcamento-cultura-sp"
 keywords: [orçamento público, execução orçamentária, política cultural, dados abertos, São Paulo]
+references:
+  - type: dataset
+    title: "Orçamento da Cultura em São Paulo — base tratada de execução orçamentária (2003–2026)"
+    authors:
+      - family-names: Farina
+        given-names: Amilcar Ferraz
+    doi: "10.5281/zenodo.24399591"
+    license: CC-BY-4.0
