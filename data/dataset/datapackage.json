@@ -1,0 +1,160 @@
+{
+  "profile": "fiscal-data-package",
+  "name": "orcamento-cultura-pmsp",
+  "title": "Execução orçamentária da Cultura — Prefeitura de São Paulo",
+  "description": "Recorte da função 13 (Cultura) e órgãos 15, 25, 79, 85, 88, 95 e 97 da base de execução orçamentária da SEPLAN/PMSP.",
+  "countryCode": "BR",
+  "fiscalPeriod": {
+    "start": "2026-01-01",
+    "end": "2026-12-31"
+  },
+  "sources": [
+    {
+      "title": "SEPLAN/PMSP — Base de Dados da Execução Orçamentária",
+      "path": "https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria"
+    }
+  ],
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "title": "Creative Commons Attribution 4.0 (tratamento); dados originais conforme a fonte"
+    }
+  ],
+  "resources": [
+    {
+      "name": "execucao-2026-cultura",
+      "path": "execucao_2026_cultura.csv",
+      "format": "csv",
+      "encoding": "utf-8",
+      "description": "Execução por dotação, 01/01/2026 a 30/11/2026, extração 19/11/2026. Recorte: função 13 e órgãos 15, 25, 79, 85, 88, 95, 97.",
+      "schema": {
+        "fields": [
+          {
+            "name": "dotacao",
+            "type": "string"
+          },
+          {
+            "name": "orgao_cod",
+            "type": "string"
+          },
+          {
+            "name": "orgao",
+            "type": "string"
+          },
+          {
+            "name": "unidade",
+            "type": "string"
+          },
+          {
+            "name": "funcao",
+            "type": "string"
+          },
+          {
+            "name": "subfuncao",
+            "type": "string"
+          },
+          {
+            "name": "programa_cod",
+            "type": "string"
+          },
+          {
+            "name": "programa",
+            "type": "string"
+          },
+          {
+            "name": "acao_cod",
+            "type": "string"
+          },
+          {
+            "name": "acao",
+            "type": "string"
+          },
+          {
+            "name": "natureza_cod",
+            "type": "string"
+          },
+          {
+            "name": "natureza",
+            "type": "string"
+          },
+          {
+            "name": "fonte_cod",
+            "type": "string"
+          },
+          {
+            "name": "fonte",
+            "type": "string"
+          },
+          {
+            "name": "emenda",
+            "type": "string"
+          },
+          {
+            "name": "tipo_credito",
+            "type": "string"
+          },
+          {
+            "name": "orcado",
+            "type": "number"
+          },
+          {
+            "name": "suplementado",
+            "type": "number"
+          },
+          {
+            "name": "reduzido",
+            "type": "number"
+          },
+          {
+            "name": "atualizado",
+            "type": "number"
+          },
+          {
+            "name": "congelado",
+            "type": "number"
+          },
+          {
+            "name": "reservado",
+            "type": "number"
+          },
+          {
+            "name": "empenhado",
+            "type": "number"
+          },
+          {
+            "name": "liquidado",
+            "type": "number"
+          },
+          {
+            "name": "pago",
+            "type": "number"
+          }
+        ]
+      }
+    },
+    {
+      "name": "serie-2003-2026",
+      "path": "serie_2003_2026.csv",
+      "format": "csv",
+      "encoding": "utf-8",
+      "description": "Totais anuais: SMC = órgão 25; F13 = função Cultura em todos os órgãos; FMC = órgão 79. Valores nominais e reais (IPCA, base 2026-10)."
+    },
+    {
+      "name": "ipca-fatores",
+      "path": "ipca_fatores.csv",
+      "format": "csv",
+      "encoding": "utf-8",
+      "description": "fator = índice do mês-base ÷ índice de dezembro do ano (ano corrente: mês-base) · BCB/SGS série 433 (IPCA mensal, IBGE)"
+    }
+  ],
+  "version": "0.1.0",
+  "created": "2026-11-20",
+  "contributors": [
+    {
+      "title": "Amilcar Ferraz Farina",
+      "role": "author",
+      "organization": "LAB_MicaDataWise",
+      "path": "https://orcid.org/0009-0000-5263-4919"
+    }
+  ]
+}
