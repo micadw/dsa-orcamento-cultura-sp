@@ -16,11 +16,14 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: Bases abertas da SEPLAN
+        continue-on-error: true
         run: python -m src.coleta_seplan
       - name: Fatores do IPCA (BCB/SGS 433)
+        continue-on-error: true
         run: python -m src.ipca
       - name: Empenhos (API-SOF v4)
         if: env.SOF_KEY != ''
+        continue-on-error: true
         run: python -m src.coleta_sof --orgaos 25 79 --saida data/empenhos
       - name: Guardar foto diária dos empenhos (fora do git, 90 dias)
         if: env.SOF_KEY != ''

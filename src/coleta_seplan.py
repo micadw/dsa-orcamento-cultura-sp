@@ -28,10 +28,20 @@ DICTS = {"org": ("Cd_Orgao", "Ds_Orgao"), "prog": ("Cd_Programa", "Ds_Programa")
          "fonte": ("Cd_Fonte", "Ds_Fonte"), "sub": ("Cd_SubFuncao", "Ds_SubFuncao")}
 
 
-def baixar(url: str) -> str:
-    req = urllib.request.Request(url, headers={"User-Agent": "dsa-orcamento-cultura-sp (pesquisa, dados abertos)"})
-    with urllib.request.urlopen(req, timeout=300) as r:   # segue o redirecionamento para drive.prefeitura
-        raw = r.read()
+def baixar(url: str, tentativas: int = 3) -> str:
+    """Baixa o arquivo identificando o projeto. Repete só em falhas temporárias (429/5xx);
+    uma recusa (403) é respeitada e propagada."""
+    import time, urllib.error
+    for i in range(tentativas):
+        req = urllib.request.Request(url, headers={"User-Agent": "dsa-orcamento-cultura-sp (pesquisa, dados abertos)"})
+        try:
+            with urllib.request.urlopen(req, timeout=300) as r:   # segue o redirecionamento para drive.prefeitura
+                raw = r.read()
+            break
+        except urllib.error.HTTPError as e:
+            if i == tentativas - 1 or e.code not in (429, 500, 502, 503, 504):
+                raise
+            time.sleep(30 * (i + 1))
     try:
         return raw.decode("utf-8")
     except UnicodeDecodeError:
