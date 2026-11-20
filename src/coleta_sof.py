@@ -70,16 +70,25 @@ def mascarar_cpf(doc: str) -> str:
 
 
 def coletar_empenhos(token: str, ano: int, mes: int, orgao: str, max_paginas: int | None = None) -> list:
-    linhas, pagina, total_pags = [], 1, None
+    """Percorre as páginas (50 registros cada). Segue enquanto vierem páginas cheias, mesmo que
+    os metadados não informem o total de páginas (comportamento observado na v4)."""
+    linhas, pagina, total_pags, tam = [], 1, None, 50
     while True:
         resp = get("empenhos", {"anoEmpenho": ano, "mesEmpenho": f"{mes:02d}", "codOrgao": orgao, "numPagina": pagina}, token)
-        meta = resp.get("metadados", {})
+        meta = resp.get("metadados", {}) or {}
+        if pagina == 1:
+            print(f"  metadados v4: { {k: v for k, v in meta.items() if 'txt' not in k.lower() or 'status' in k.lower()} }", file=sys.stderr)
         if meta.get("txtStatus") == "SEM_REGISTROS":
             break
-        total_pags = total_pags or int(meta.get("qtdPaginas") or 1)
-        linhas += lista_de(resp)
-        print(f"  órgão {orgao} · página {pagina}/{total_pags} · {len(linhas)} empenhos", file=sys.stderr)
-        if pagina >= total_pags or (max_paginas and pagina >= max_paginas):
+        if total_pags is None:
+            for k, v in meta.items():
+                if "pagina" in k.lower() and str(v).isdigit() and int(v) > 0:
+                    total_pags = int(v)
+        lote = lista_de(resp)
+        linhas += lote
+        print(f"  órgão {orgao} · página {pagina}/{total_pags or '?'} · {len(linhas)} empenhos", file=sys.stderr)
+        fim = (total_pags is not None and pagina >= total_pags and len(lote) < tam) or len(lote) < tam or not lote
+        if fim or (max_paginas and pagina >= max_paginas) or pagina >= 2000:
             break
         pagina += 1
         time.sleep(0.3)                          # gentileza com o servidor
