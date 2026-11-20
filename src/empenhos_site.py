@@ -10,7 +10,8 @@ Chave de ligação com a base da SEPLAN (a mesma da ficha):
   da natureza (categoria, grupo, modalidade, elemento). Dentro de cada chave, os
   valores também são separados por fonte de recursos.
 
-LGPD: o nome do credor só aparece quando o documento é um CNPJ (14 dígitos).
+LGPD: o nome do credor só aparece quando o documento é um CNPJ (14 dígitos) e a
+razão social não é a de um MEI (que contém o nome do titular).
 Pessoa física, ou documento ausente ou ilegível, vira "[pessoa física]", e o CPF
 fica mascarado (src.coleta_sof.mascarar_cpf).
 """
@@ -36,6 +37,14 @@ CAMPOS = {
 }
 LARG = {"org": 2, "uni": 2, "fun": 2, "sub": 3, "prog": 4, "pa": 4}
 PF = "[pessoa física]"
+MEI = "[microempreendedor individual]"
+# Razão social de MEI = 8 primeiros dígitos do CNPJ + nome completo do titular (pessoa natural).
+_RE_MEI = re.compile(r"^\s*\d{8}\s+\D")
+
+
+def nome_publicavel(nome: str) -> str:
+    """LGPD: o nome do titular de um MEI é dado pessoal; mostra só a categoria."""
+    return MEI if _RE_MEI.match(nome or "") else nome
 
 
 def mapear(cabecalho: list) -> dict:
@@ -93,7 +102,7 @@ def credor(r: dict, m: dict) -> tuple[str, str]:
     doc = digitos(r[m["doc"]]) if m["doc"] else ""
     bruto = str(r[m["doc"]]) if m["doc"] else ""
     if len(doc) == 14 and "*" not in bruto:
-        return (str(r[m["nome"]] or "").strip() if m["nome"] else ""), doc
+        return nome_publicavel(str(r[m["nome"]] or "").strip() if m["nome"] else ""), doc
     return PF, mascarar_cpf(doc) if len(doc) == 11 else (bruto if "*" in bruto else "")
 
 

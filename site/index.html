@@ -273,7 +273,7 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
     <ul>
       <li>SEPLAN/PMSP · <a href="https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria">Base de Dados da Execução Orçamentária</a> (diária) e consolidada 2003–2026</li>
       <li>Banco Central do Brasil · SGS série 433 (IPCA mensal, IBGE)</li>
-      <li>Em breve: API-SOF v4 (empenhos e credores), decretos de crédito do Diário Oficial e emendas da Câmara</li>
+      <li>API-SOF v4 (APILib): empenhos e credores na ficha de cada dotação, coletados nos dias úteis (órgãos 25, 79, 85 e 15)</li><li>Em breve: decretos de crédito do Diário Oficial e emendas da Câmara</li>
     </ul>
     <h3>Limites conhecidos</h3>
     <ul>
@@ -527,7 +527,7 @@ function blocoEmpenhos(code, s){
         ult.map(u=>`<tr><td class="code">${esc(u[0])}</td><td>${esc(fmtData(u[1]))}</td><td>${esc(u[2])}</td><td class="n">${brl(u[3])}</td><td class="code">${esc(u[4])}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Sem empenhos nesta fonte.</td></tr>`
       }</tbody></table></div>
     </div></div>
-    <p class="note">Pessoas físicas aparecem como “[pessoa física]”, com o CPF mascarado (LGPD). Os empenhos são ligados à dotação pelo órgão, unidade, função, subfunção, programa, projeto/atividade, natureza até o elemento e fonte.</p>`;
+    <p class="note">Pessoas físicas aparecem como “[pessoa física]”, com o CPF mascarado, e o nome do titular de MEI é omitido (LGPD). Os empenhos são ligados à dotação pelo órgão, unidade, função, subfunção, programa, projeto/atividade, natureza até o elemento e fonte.</p>`;
 }
 const fmtDoc = d => /^\d{14}$/.test(d) ? d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,"$1.$2.$3/$4-$5") : (d||"—");
 const fmtData = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d||""); return m ? `${m[3]}/${m[2]}/${m[1]}` : (d||""); };
