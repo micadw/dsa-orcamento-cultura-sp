@@ -299,7 +299,7 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
     <ul>
       <li>SEPLAN/PMSP · <a href="https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria">Base de Dados da Execução Orçamentária</a> (diária) e consolidada 2003–2026</li>
       <li>Banco Central do Brasil · SGS série 433 (IPCA mensal, IBGE)</li>
-      <li>API-SOF v4 (APILib): empenhos e credores na ficha de cada dotação, coletados nos dias úteis (órgãos 25, 79, 85 e 15)</li><li>Em breve: decretos de crédito do Diário Oficial e emendas da Câmara</li>
+      <li>API-SOF v4 (APILib): empenhos e credores na ficha de cada dotação, coletados nos dias úteis (órgãos 25, 79, 85 e 15)</li><li>Catálogo de Legislação Municipal (Casa Civil): decretos, portarias e resoluções que abrem crédito adicional em 2026, ligados à ficha de cada dotação</li><li>Em breve: emendas da Câmara</li>
     </ul>
     <h3>Limites conhecidos</h3>
     <ul>
@@ -350,7 +350,7 @@ const VALS = ["orc","sup","red","atu","cong","res","emp","liq","pago"];
   document.addEventListener("keydown", e => { const th = e.target.closest && e.target.closest("th.ord"); if (th && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ordenar(th); } });
   new MutationObserver(marcar).observe(document.body, {childList:true, subtree:true}); marcar();
 })();
-let P, H, IP, E = null, ROWS = [], state = {q:"", org:"25", tipo:"", drill:{}, ent:"SMC", mode:"real", dim:"prog"};
+let D = null, P, H, IP, E = null, ROWS = [], state = {q:"", org:"25", tipo:"", drill:{}, ent:"SMC", mode:"real", dim:"prog"};
 const $ = s => document.querySelector(s);
 const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
 const mi = v => { if(!isFinite(v)) return "—"; const a=Math.abs(v); if(a>=1e9) return "R$ "+(v/1e9).toLocaleString("pt-BR",{maximumFractionDigits:2})+" bi"; if(a>=1e6) return "R$ "+(v/1e6).toLocaleString("pt-BR",{maximumFractionDigits:1})+" mi"; if(a>=1e3) return "R$ "+(v/1e3).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil"; return "R$ "+v.toLocaleString("pt-BR",{maximumFractionDigits:0}); };
@@ -367,6 +367,7 @@ function hideTip(){ tip.style.opacity = 0; }
 const status = x => !isFinite(x) ? "" : x >= .85 ? `<span class="pill good">alta</span>` : x >= .6 ? `<span class="pill warn">média</span>` : `<span class="pill crit">baixa</span>`;
 function sum(rows){ const s = {}; VALS.forEach(k=>s[k]=0); rows.forEach(o=>VALS.forEach(k=>s[k]+=o.r[F[k]])); return s; }
 
+fetch("decretos26.json").then(r=>r.ok?r.json():null).then(d=>{ D = d; if (P && location.hash.startsWith("#dot-")) route(); }).catch(()=>{});
 fetch("empenhos26.json").then(r=>r.ok?r.json():null).then(e=>{ E = e; if (P && location.hash.startsWith("#dot-")) route(); }).catch(()=>{});
 Promise.all(["data26.json","hist.json","ipca.json"].map(f=>fetch(f).then(r=>{ if(!r.ok) throw new Error(f); return r.json(); }))).then(([p,h,ip]) => {
   P = p; H = h; IP = ip;
@@ -546,7 +547,7 @@ function renderFicha(code){
     <div class="grid2"><div>
       <h3>Linha do tempo em 2026</h3>
       <ol class="steps">${linha.map(([k,v,m,on])=>`<li><span class="dot ${on?"":"off"}"></span><div>${k}<div class="m">${m}</div></div><span class="v">${brl(v)}</span></li>`).join("")}</ol>
-      <p class="note">Ainda nesta ficha, nas próximas versões: emendas da Câmara e decretos de crédito do Diário Oficial.</p>
+      <p class="note">Ainda nesta ficha, nas próximas versões: emendas da Câmara.</p>
     </div><div>
       <h3>Situação</h3>
       <div class="rates" style="margin-top:0">${[["Execução do empenho",pct(s.emp,s.atu)],["Liquidação",pct(s.liq,s.emp)],["Pagamento",pct(s.pago,s.liq)]].map(([k,x])=>`<div class="rate"><div class="top"><span>${k} ${status(x)}</span><b>${fp(x)}</b></div><div class="meter"><i style="width:${Math.max(0,Math.min(1,x||0))*100}%"></i></div></div>`).join("")}</div>
@@ -554,6 +555,7 @@ function renderFicha(code){
       <p><code style="font-size:.78rem;word-break:break-all">${esc(location.href.split("#")[0])}#${slug(code)}</code></p>
       <button type="button" class="ghost" id="share">Copiar link desta dotação</button> <span class="note" id="sharemsg"></span>
     </div></div>
+    ${blocoDecretos(code, s)}
     ${blocoEmpenhos(code, s)}
     <h3>Outras dotações da mesma ação (${irmas.length})</h3>
     <div class="tblwrap"><table><thead><tr><th>Dotação</th><th>Natureza</th><th class="n">Atualizado</th><th class="n">Empenhado</th><th class="n">% emp.</th></tr></thead><tbody>${
@@ -563,6 +565,21 @@ function renderFicha(code){
   box.querySelectorAll("tr.click").forEach(tr => tr.addEventListener("click", () => location.hash = slug(tr.dataset.c)));
   listaFicha();
   $("#share").addEventListener("click", async () => { try { await navigator.clipboard.writeText(location.href); $("#sharemsg").textContent = "Link copiado."; } catch(e){ $("#sharemsg").textContent = "Copie o endereço acima."; } });
+}
+
+/* Créditos adicionais (decretos, portarias e resoluções) que citam a dotação, lidos do Catálogo de Legislação. */
+function blocoDecretos(code, s){
+  if (!D) return "";
+  const L = D.dot[code] || [];
+  const sup = L.filter(x=>x[2]>0).reduce((a,x)=>a+x[3],0), red = L.filter(x=>x[2]<0).reduce((a,x)=>a+x[3],0);
+  const cmp = (s.sup||s.red) ? ` Na base da SEPLAN: ${brl(s.sup||0)} suplementados e ${brl(Math.abs(s.red||0))} reduzidos.` : "";
+  if (!L.length) return `<h3>Créditos adicionais</h3><p class="note">Nenhum decreto ou portaria de crédito de ${D.ano} cita esta dotação no Catálogo de Legislação (${D.atos_lidos} atos lidos até ${esc(fmtData(D.extr))}).${cmp}</p>`;
+  return `<h3>Créditos adicionais <span class="note">Catálogo de Legislação Municipal · ${L.length} ato(s)</span></h3>
+    <p class="note">Suplementações: ${brl(sup)} · anulações para cobrir outras dotações: ${brl(red)} · saldo: ${brl(sup-red)}.${cmp}</p>
+    <div class="tblwrap"><table><thead><tr><th>Data</th><th>Ato</th><th>Movimento</th><th class="n">Valor</th></tr></thead><tbody>${
+      L.map(x=>`<tr><td>${esc(fmtData(x[1]))}</td><td><a href="https://legislacao.prefeitura.sp.gov.br${esc(x[4])}" target="_blank" rel="noopener">${esc(x[0])}</a></td><td>${x[2]>0?"Suplementação (+)":"Anulação (−)"}</td><td class="n">${brl(x[3])}</td></tr>`).join("")
+    }</tbody></table></div>
+    <p class="note">As diferenças em relação à SEPLAN vêm de atos ainda não catalogados, de datas de extração diferentes ou de créditos abertos por outros instrumentos.</p>`;
 }
 
 /* Empenhos da API-SOF ligados à dotação: chave = 10 primeiras partes do código (sem o desdobramento da natureza) + fonte. */
