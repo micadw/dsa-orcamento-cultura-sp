@@ -1,0 +1,21 @@
+{
+  "title": "Orçamento da Cultura em São Paulo: da proposta ao pagamento",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Farina, Amilcar Ferraz",
+      "orcid": "0009-0000-5263-4919"
+    }
+  ],
+  "description": "Ferramenta e dados para consulta da execução orçamentária da cultura na Prefeitura de São Paulo por código de dotação (2003–2026): coleta diária das bases abertas da SEPLAN e da API-SOF, taxas de execução, série histórica e site de consulta. Desenvolvido com dados abertos; não representa posição oficial da Prefeitura de São Paulo.",
+  "license": "MIT",
+  "keywords": [
+    "orçamento público",
+    "execução orçamentária",
+    "política cultural",
+    "transparência",
+    "dados abertos",
+    "São Paulo"
+  ],
+  "language": "por"
+}

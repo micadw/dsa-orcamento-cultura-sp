@@ -4,8 +4,8 @@ title: "Orçamento da Cultura em São Paulo — da proposta ao pagamento"
 authors:
   - family-names: Farina
     given-names: Amilcar Ferraz
-    alias: Mica
-version: 0.1.0
+    orcid: "https://orcid.org/0009-0000-5263-4919"
+version: "0.1.0"
 date-released: 2026-11-20
 license: MIT
 repository-code: "https://github.com/micadw/dsa-orcamento-cultura-sp"

@@ -1,6 +1,6 @@
 # Orçamento da Cultura em São Paulo — da proposta ao pagamento
 
-> **Status:** rascunho · repositório privado · piloto (sprint 1)
+> **Status:** em andamento · piloto (sprint 1)
 
 Piloto de site para acesso e visualização dos dados públicos de planejamento, empenho e execução orçamentária da Prefeitura de São Paulo, com busca pelo **código da dotação**, resumos estatísticos, taxas de execução, série histórica 2003–2026 e acesso aos dados brutos. Estudo de caso: **Secretaria Municipal de Cultura (órgão 25)**, Fundo Municipal de Cultura (79) e a função 13 (Cultura) em todos os órgãos.
 
@@ -32,6 +32,12 @@ Ver `docs/benchmarking.md` para projetos semelhantes e o backlog.
 
 Projeto pessoal com dados abertos; não representa posição oficial da PMSP. Nenhuma informação obtida no exercício de cargo público é usada. CPF de credores pessoa física é mascarado (LGPD).
 
-## Licenças
+## Licença e citação
 
-Código: MIT. Textos e figuras: CC BY 4.0. Dados: conforme licença da fonte.
+Código sob [MIT](LICENSE). Dados tratados, site, figuras e textos sob [CC BY 4.0](LICENSE-DATA.md). Para citar, use o arquivo [`CITATION.cff`](CITATION.cff) (botão "Cite this repository" no GitHub).
+
+---
+
+## English summary
+
+**Culture budget in São Paulo, from proposal to payment.** A pilot tool to search the City of São Paulo's budget by appropriation code (*dotação*), with execution rates (approved → adjusted → committed → paid), a 2003–2026 time series and raw-data access, using the Secretariat of Culture as a case study. Data are collected daily from the city's open budget files (SEPLAN) and the public SOF API. Built with open data only; does not represent an official position of the City of São Paulo.
