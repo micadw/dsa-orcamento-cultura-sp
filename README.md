@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24399304.svg)](https://doi.org/10.5281/zenodo.24399304) · **Site:** https://micadw.github.io/dsa-orcamento-cultura-sp/
 
-> **Status:** em andamento · piloto (sprint 1)
+> **Status:** em andamento · piloto (sprint 2: empenhos e credores na ficha da dotação)
 
 Piloto de site para acesso e visualização dos dados públicos de planejamento, empenho e execução orçamentária da Prefeitura de São Paulo, com busca pelo **código da dotação**, resumos estatísticos, taxas de execução, série histórica 2003–2026 e acesso aos dados brutos. Estudo de caso: **Secretaria Municipal de Cultura (órgão 25)**, Fundo Municipal de Cultura (79) e a função 13 (Cultura) em todos os órgãos.
 

@@ -29,7 +29,7 @@ Levantamento feito em 20/11/2026. Projetos estrangeiros servem **apenas como ref
 ## Backlog priorizado (MoSCoW)
 
 **Must — sprints 2 e 3**
-1. Ligação dotação ↔ empenho com drill-down até o credor (API-SOF `/empenhos`, `/liquidacoes`) — USAspending/BudgetKey.
+1. ✅ (sprint 2, 2026-11-20) Ligação dotação ↔ empenho com drill-down até o credor (API-SOF `/empenhos`; órgãos 25, 79, 85 e 15) — USAspending/BudgetKey. Pendente: `/liquidacoes` e FUNDURB/subprefeituras (função 13).
 2. Ficha da dotação com linha do tempo: PLOA → emenda → LOA → créditos/congelamentos → empenho → pagamento → restos a pagar — BudgetKey.
 3. Valores reais (IPCA) além de nominais — ENAP.
 4. Endereço compartilhável por dotação (`#dot-25-10-13-392-4032-6364`).
