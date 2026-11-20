@@ -17,6 +17,8 @@ jobs:
         with: { python-version: "3.12" }
       - name: Bases abertas da SEPLAN
         run: python -m src.coleta_seplan
+      - name: Fatores do IPCA (BCB/SGS 433)
+        run: python -m src.ipca
       - name: Empenhos (API-SOF v4)
         if: env.SOF_KEY != ''
         run: python -m src.coleta_sof --orgaos 25 79 --saida data/empenhos

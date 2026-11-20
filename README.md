@@ -13,7 +13,7 @@ Piloto de site para acesso e visualização dos dados públicos de planejamento,
 ```bash
 python -m src.coleta_seplan          # bases abertas da SEPLAN → site/data26.json e site/hist.json
 python -m src.coleta_sof --teste     # API-SOF v4 (exige SOF_KEY e SOF_SECRET no ambiente)
-python -m http.server -d site        # abre o site em http://localhost:8000
+python -m http.server -d site        # local: http://localhost:8000 · publicado: https://micadw.github.io/dsa-orcamento-cultura-sp/
 ```
 
 Notebooks: `notebooks/001_coleta.ipynb`, `notebooks/002_eda.ipynb`

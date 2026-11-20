@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dotações da Cultura PMSP</title>
+<title>Orçamento da Cultura · São Paulo</title>
+<meta name="description" content="Consulta pública da execução orçamentária da cultura na Prefeitura de São Paulo por código de dotação, com dados abertos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Layout: barra de busca fixa no topo → resumo (cartões + funil) → séries → quebra → dados brutos */
-  --bg:#f6f7f8; --surface:#ffffff; --ink:#14181d; --ink-2:#4b535c; --ink-3:#7a828b;
+  /* Layout: cabeçalho + abas (Início · Explorar · Série · Como ler) → conteúdo da vista; ficha da dotação abre por #dot-… */
+  --bg:#f6f7f8; --surface:#ffffff; --ink:#14181d; --ink-2:#4b535c; --ink-3:#6f7781;
   --line:#dde1e5; --accent:#1c5cab; --accent-soft:#e6eef9;
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --neutral:#8b9198;
   --good:#0b7a3b; --warn:#a86400; --crit:#b42318;
@@ -17,29 +18,33 @@
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#121417; --surface:#1a1d21; --ink:#eef0f2; --ink-2:#b9c0c7; --ink-3:#8a929a;
+  --bg:#121417; --surface:#1a1d21; --ink:#eef0f2; --ink-2:#b9c0c7; --ink-3:#959da5;
   --line:#2c3137; --accent:#6da7ec; --accent-soft:#1d2a3a;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --neutral:#7d848b;
   --good:#3bb36b; --warn:#e0a03a; --crit:#f06d63; color-scheme:dark; } }
 :root[data-theme="dark"]{
-  --bg:#121417; --surface:#1a1d21; --ink:#eef0f2; --ink-2:#b9c0c7; --ink-3:#8a929a;
+  --bg:#121417; --surface:#1a1d21; --ink:#eef0f2; --ink-2:#b9c0c7; --ink-3:#959da5;
   --line:#2c3137; --accent:#6da7ec; --accent-soft:#1d2a3a;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --neutral:#7d848b;
   --good:#3bb36b; --warn:#e0a03a; --crit:#f06d63; color-scheme:dark; }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
 .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
-header{padding:22px 0 10px}
-h1{font-family:var(--f-display);font-weight:600;font-size:1.75rem;margin:0 0 4px;text-wrap:balance}
-.sub{color:var(--ink-2);margin:0;font-size:.92rem}
+header{padding:20px 0 6px}
+h1{font-family:var(--f-display);font-weight:600;font-size:1.7rem;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--ink-2);margin:0;font-size:.9rem}
 .sub b{color:var(--ink)}
-.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 0}
-.bar .wrap{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+nav.tabs{position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
+nav.tabs a{padding:12px 14px;color:var(--ink-2);text-decoration:none;font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
+.view{display:none}.view.on{display:block}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:14px 0 4px}
 .field{display:flex;flex-direction:column;gap:3px}
 .field label{font-size:.75rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
 input,select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
-#q{font-family:var(--f-mono);min-width:340px;flex:1}
-.field.grow{flex:1;min-width:260px}
+#q{font-family:var(--f-mono);min-width:320px}
+.field.grow{flex:1;min-width:240px}
 button{cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
 button.ghost{background:var(--surface);color:var(--accent)}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -49,7 +54,9 @@ button.ghost{background:var(--surface);color:var(--accent)}
 .hint code{font-family:var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:4px;cursor:pointer;color:var(--ink-2)}
 section{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;margin:16px 0}
 h2{font-size:1.02rem;margin:0 0 4px;font-weight:600}
+h3{font-size:.95rem;margin:14px 0 6px}
 .lede{color:var(--ink-2);font-size:.87rem;margin:0 0 14px}
+.big{font-family:var(--f-display);font-size:1.35rem;line-height:1.35;margin:0 0 14px;text-wrap:balance}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .tile{border:1px solid var(--line);border-radius:8px;padding:12px}
 .tile .k{font-size:.75rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em}
@@ -57,20 +64,24 @@ h2{font-size:1.02rem;margin:0 0 4px;font-weight:600}
 .tile .d{font-size:.8rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .rates{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}
 .rate{display:flex;flex-direction:column;gap:6px}
-.rate .top{display:flex;justify-content:space-between;font-size:.85rem}
+.rate .top{display:flex;justify-content:space-between;font-size:.85rem;gap:8px}
 .rate .top b{font-variant-numeric:tabular-nums}
 .meter{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
 .meter i{display:block;height:100%;background:var(--accent);border-radius:4px}
-.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 7px;border-radius:999px;border:1px solid currentColor}
+.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
 .pill.good{color:var(--good)} .pill.warn{color:var(--warn)} .pill.crit{color:var(--crit)}
+.alerts{display:flex;flex-direction:column;gap:8px}
+.alert{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-left:4px solid var(--warn);border-radius:6px;padding:10px 12px;cursor:pointer;background:var(--surface)}
+.alert.crit{border-left-color:var(--crit)}
+.alert .t{font-weight:600;font-size:.9rem}
+.alert .m{font-size:.82rem;color:var(--ink-2)}
 .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
 @media (max-width:860px){.grid2{grid-template-columns:1fr} #q{min-width:0}}
 svg text{fill:var(--ink-2);font-family:var(--f-body);font-size:11px}
-.axis line,.grid line{stroke:var(--line)}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.82rem;color:var(--ink-2);margin:6px 0}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:14px;height:3px;border-radius:2px;display:inline-block}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
 .seg button{border:0;border-radius:0;background:var(--surface);color:var(--ink-2);padding:6px 10px;font-weight:500}
 .seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
@@ -82,12 +93,27 @@ td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.code{font-family:var(--f-mono);font-size:.78rem;white-space:nowrap;color:var(--ink-2)}
 tr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}
 .hb{height:8px;background:var(--s1);border-radius:0 4px 4px 0;min-width:1px}
-.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.8rem;padding:7px 9px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:20;font-variant-numeric:tabular-nums;max-width:280px}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:.8rem;padding:7px 9px;border-radius:6px;opacity:0;transition:opacity .1s;z-index:20;font-variant-numeric:tabular-nums;max-width:300px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;font-size:.84rem}
 .stats div{border-left:3px solid var(--line);padding:2px 8px}
 .stats b{display:block;font-variant-numeric:tabular-nums;font-size:.95rem}
 .note{font-size:.8rem;color:var(--ink-3)}
-.src a{color:var(--accent)}
+a{color:var(--accent)}
+abbr[title]{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
+.codebar{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.codebar .part{border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:90px}
+.codebar .part .c{font-family:var(--f-mono);font-weight:500}
+.codebar .part .l{font-size:.72rem;color:var(--ink-3);text-transform:uppercase;letter-spacing:.03em}
+.codebar .part .x{font-size:.8rem;color:var(--ink-2)}
+.steps{list-style:none;padding:0;margin:0;display:grid;gap:0}
+.steps li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.steps .dot{width:12px;height:12px;border-radius:50%;margin-top:4px;background:var(--s1)}
+.steps .dot.off{background:var(--line)}
+.steps .v{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.steps .m{font-size:.8rem;color:var(--ink-3)}
+.prose{max-width:72ch}
+.prose dt{font-weight:600;margin-top:10px}
+.prose dd{margin:2px 0 0 0;color:var(--ink-2)}
 footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
 .empty{padding:20px;color:var(--ink-2)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -95,44 +121,69 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
 </head>
 <body>
 <header class="wrap">
-  <h1>Dotações da Cultura · Prefeitura de São Paulo</h1>
+  <h1>Orçamento da Cultura · São Paulo</h1>
   <p class="sub" id="meta">Carregando a base de execução orçamentária…</p>
 </header>
-
-<div class="bar">
+<nav class="tabs" aria-label="Seções">
   <div class="wrap">
+    <a href="#inicio" data-view="inicio">Início</a>
+    <a href="#explorar" data-view="explorar">Explorar dotações</a>
+    <a href="#serie" data-view="serie">Série 2003–2026</a>
+    <a href="#como-ler" data-view="como-ler">Como ler</a>
+  </div>
+</nav>
+
+<main class="wrap">
+<!-- ============ INÍCIO ============ -->
+<div class="view" id="v-inicio">
+  <section>
+    <p class="big" id="headline"></p>
+    <div class="tiles" id="h-tiles"></div>
+  </section>
+  <div class="grid2">
+    <section>
+      <h2>Alertas</h2>
+      <p class="lede">Ações orçamentárias da Cultura que fogem do padrão em 2026. Clique para abrir.</p>
+      <div class="alerts" id="alerts"></div>
+    </section>
+    <section>
+      <h2>Onde está o dinheiro</h2>
+      <p class="lede">As maiores ações da Secretaria Municipal de Cultura pelo valor atualizado, com quanto já foi empenhado.</p>
+      <div class="tblwrap"><table id="top"></table></div>
+    </section>
+  </div>
+  <section>
+    <h2>Secretaria de Cultura, 2003–2026, em valores de hoje</h2>
+    <p class="lede" id="spark-lede"></p>
+    <svg id="spark" width="100%" height="140" role="img" aria-label="Orçamento atualizado e pago da SMC corrigido pelo IPCA"></svg>
+  </section>
+</div>
+
+<!-- ============ EXPLORAR ============ -->
+<div class="view" id="v-explorar">
+  <div class="bar">
     <div class="field grow">
       <label for="q">Código de dotação (prefixo) ou palavra</label>
       <input id="q" type="search" placeholder="25.10.13.392.4032  ·  ou  fomento" autocomplete="off">
     </div>
-    <div class="field">
-      <label for="org">Órgão</label>
-      <select id="org"></select>
-    </div>
-    <div class="field">
-      <label for="tipo">Origem do crédito</label>
-      <select id="tipo"><option value="">Todas</option><option>Inicial</option><option>Suplementar</option><option value="emenda">Só com emenda parlamentar</option></select>
-    </div>
+    <div class="field"><label for="org">Órgão</label><select id="org"></select></div>
+    <div class="field"><label for="tipo">Origem do crédito</label>
+      <select id="tipo"><option value="">Todas</option><option>Inicial</option><option>Suplementar</option><option value="emenda">Só com emenda parlamentar</option></select></div>
     <button class="ghost" id="clear" type="button">Limpar</button>
   </div>
-  <div class="wrap">
-    <div class="chips" id="chips"></div>
-    <div class="hint">Exemplos: <code data-q="25.10.13.392.4032">25.10.13.392.4032</code> <code data-q="25.10.13.392.4032.6364">…4032.6364</code> <code data-q="3.3.50">natureza 3.3.50 (OSC)</code> <code data-q="fomento">fomento</code> <code data-q="79">79 (Fundo Mun. de Cultura)</code></div>
-  </div>
-</div>
+  <div class="chips" id="chips"></div>
+  <div class="hint">Exemplos: <code data-q="25.10.13.392.4032">25.10.13.392.4032</code> <code data-q="25.10.13.392.4032.6364">…4032.6364</code> <code data-q="3.3.50">natureza 3.3.50</code> <code data-q="fomento">fomento</code> <code data-q="79">79 (Fundo Mun. de Cultura)</code></div>
 
-<main class="wrap">
-  <section id="sum">
+  <section>
     <h2>Resumo da seleção · exercício 2026</h2>
     <p class="lede" id="sumlede"></p>
     <div class="tiles" id="tiles"></div>
     <div class="rates" id="rates"></div>
   </section>
-
   <div class="grid2">
     <section>
       <h2>Do orçado ao pago</h2>
-      <p class="lede">Cada barra é um estágio da despesa em 2026. A diferença entre orçado e atualizado são os créditos adicionais e reduções.</p>
+      <p class="lede">A diferença entre orçado e atualizado são os <abbr title="Créditos adicionais: alterações do orçamento durante o ano, por decreto ou lei, que somam (suplementação) ou retiram (redução) recursos de uma dotação.">créditos adicionais</abbr> e reduções.</p>
       <svg id="funnel" width="100%" height="230" role="img" aria-label="Funil do orçamento da seleção"></svg>
     </section>
     <section>
@@ -143,7 +194,38 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
       <svg id="histo" width="100%" height="120" role="img" aria-label="Histograma da taxa de empenho"></svg>
     </section>
   </div>
+  <section>
+    <h2>Quebra da seleção</h2>
+    <div class="controls">
+      <label for="dim" class="note">Agrupar por</label>
+      <select id="dim">
+        <option value="prog">Programa</option><option value="pa">Projeto / Atividade</option>
+        <option value="desp">Natureza da despesa</option><option value="fonte">Fonte de recurso</option>
+        <option value="org">Órgão</option><option value="sub">Subfunção</option>
+      </select>
+      <span class="note">Clique numa linha para filtrar por ela.</span>
+    </div>
+    <div class="tblwrap"><table id="brk"></table></div>
+  </section>
+  <section>
+    <h2>Dotações da seleção</h2>
+    <div class="controls">
+      <button type="button" id="dl">Baixar CSV da seleção</button>
+      <button type="button" class="ghost" id="copy">Copiar CSV</button>
+      <span class="note" id="copymsg">Clique numa dotação para abrir a ficha.</span>
+    </div>
+    <div class="tblwrap" style="max-height:460px"><table id="raw"></table></div>
+  </section>
+</div>
 
+<!-- ============ FICHA ============ -->
+<div class="view" id="v-ficha">
+  <p style="margin:14px 0 0"><a href="#explorar">← Voltar para Explorar</a></p>
+  <section id="ficha"></section>
+</div>
+
+<!-- ============ SÉRIE ============ -->
+<div class="view" id="v-serie">
   <section>
     <h2>Série histórica 2003–2026</h2>
     <p class="lede" id="histlede"></p>
@@ -154,86 +236,158 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
         <button type="button" data-ent="FMC" aria-pressed="false">Fundo Mun. de Cultura (79)</button>
       </div>
       <div class="seg" role="group" aria-label="Medida">
-        <button type="button" data-mode="rs" aria-pressed="true">R$ nominais</button>
+        <button type="button" data-mode="real" aria-pressed="true">R$ de hoje (IPCA)</button>
+        <button type="button" data-mode="rs" aria-pressed="false">R$ nominais</button>
         <button type="button" data-mode="pct" aria-pressed="false">Taxas de execução</button>
         <button type="button" data-mode="share" aria-pressed="false">% do orçamento PMSP</button>
       </div>
     </div>
     <div class="legend" id="hleg"></div>
-    <svg id="hist" width="100%" height="300" role="img" aria-label="Série histórica"></svg>
-    <p class="note">Valores nominais, sem correção pela inflação. 2026 é exercício em andamento. O Fundo Municipal de Cultura não aparece como órgão próprio na base entre 2018 e 2025.</p>
+    <svg id="hist" width="100%" height="320" role="img" aria-label="Série histórica"></svg>
+    <p class="note" id="histnote"></p>
   </section>
+</div>
 
-  <section>
-    <h2>Quebra da seleção</h2>
-    <div class="controls">
-      <label for="dim" class="note">Agrupar por</label>
-      <select id="dim">
-        <option value="prog">Programa</option>
-        <option value="pa">Projeto / Atividade</option>
-        <option value="desp">Natureza da despesa</option>
-        <option value="fonte">Fonte de recurso</option>
-        <option value="org">Órgão</option>
-        <option value="sub">Subfunção</option>
-      </select>
-      <span class="note">Clique numa linha para filtrar por ela.</span>
-    </div>
-    <div class="tblwrap"><table id="brk"></table></div>
+<!-- ============ COMO LER ============ -->
+<div class="view" id="v-como-ler">
+  <section class="prose">
+    <h2>Como ler uma dotação</h2>
+    <p>A <b>dotação</b> é a menor unidade do orçamento: o endereço completo de um valor autorizado. Em São Paulo o código tem oito partes, por exemplo <code>25.10.13.392.4032.6364.3.3.90.39.00.00</code>:</p>
+    <div class="codebar" id="codeex"></div>
+    <h3>O caminho do dinheiro</h3>
+    <dl>
+      <dt>Orçado inicial (LOA)</dt><dd>Valor aprovado pela Câmara na Lei Orçamentária Anual, depois da proposta do Executivo e das emendas dos vereadores.</dd>
+      <dt>Atualizado</dt><dd>Orçado inicial mais suplementações menos reduções feitas durante o ano (créditos adicionais).</dd>
+      <dt>Congelado</dt><dd>Parte do valor bloqueada pela Junta Orçamentário-Financeira; não pode ser empenhada enquanto durar o bloqueio.</dd>
+      <dt>Reservado</dt><dd>Valor separado para uma contratação em andamento.</dd>
+      <dt>Empenhado</dt><dd>Compromisso formal de gasto com um credor (nota de empenho).</dd>
+      <dt>Liquidado</dt><dd>Serviço ou bem entregue e conferido; a Prefeitura reconhece a dívida.</dd>
+      <dt>Pago</dt><dd>Dinheiro efetivamente transferido ao credor.</dd>
+      <dt>Restos a pagar</dt><dd>Empenhos do ano que ficam para ser pagos no ano seguinte.</dd>
+    </dl>
+    <h3>Taxas usadas</h3>
+    <p>Execução do empenho = empenhado ÷ atualizado · Liquidação = liquidado ÷ empenhado · Pagamento = pago ÷ liquidado. Faixas: <span class="pill good">alta ≥ 85%</span> <span class="pill warn">média 60–85%</span> <span class="pill crit">baixa &lt; 60%</span>. O ano corrente é parcial, então taxas baixas no meio do ano são esperadas.</p>
+    <h3>Valores de hoje</h3>
+    <p id="ipcanote"></p>
+    <h3>Fontes</h3>
+    <ul>
+      <li>SEPLAN/PMSP · <a href="https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria">Base de Dados da Execução Orçamentária</a> (diária) e consolidada 2003–2026</li>
+      <li>Banco Central do Brasil · SGS série 433 (IPCA mensal, IBGE)</li>
+      <li>Em breve: API-SOF v4 (empenhos e credores), decretos de crédito do Diário Oficial e emendas da Câmara</li>
+    </ul>
+    <h3>Limites conhecidos</h3>
+    <ul>
+      <li>O Fundo Municipal de Cultura (órgão 79) não aparece como órgão próprio na base consolidada entre 2018 e 2025.</li>
+      <li>Recorte desta versão: função 13 (Cultura) e órgãos 15, 25, 79, 85, 88, 95 e 97.</li>
+      <li>Os dados são os publicados pela Prefeitura; divergências devem ser conferidas na fonte.</li>
+    </ul>
+    <h3>Aviso e licenças</h3>
+    <p>Projeto pessoal com dados abertos; não representa posição oficial da Prefeitura de São Paulo. Código sob MIT, dados tratados e textos sob CC BY 4.0. <a href="https://github.com/micadw/dsa-orcamento-cultura-sp">Código e dados no GitHub</a>.</p>
   </section>
-
-  <section>
-    <h2>Dados brutos da seleção</h2>
-    <div class="controls">
-      <button type="button" id="copy">Copiar CSV da seleção</button>
-      <span class="note" id="copymsg"></span>
-    </div>
-    <div class="tblwrap" style="max-height:460px"><table id="raw"></table></div>
-    <p class="note src">Arquivos oficiais completos: <a href="https://prefeitura.sp.gov.br/cidade/secretarias/upload/seplan/arquivos/Exercicio_2026/basedadosexecucao_2026.csv">execução 2026 (.csv)</a> · <a href="https://prefeitura.sp.gov.br/cidade/secretarias/upload/seplan/arquivos/Exercicio_2026/basedadosexecucaoconsolidados_2026.csv">consolidado 2003–2026 (.csv)</a> · <a href="https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria">página da SEPLAN</a></p>
-  </section>
+</div>
 </main>
-<footer class="wrap">Fonte: Secretaria Municipal de Planejamento e Eficiência, Base de Dados da Execução Orçamentária (SOF), dados abertos. Recorte desta versão: função 13 (Cultura) e órgãos 15, 25, 79, 85, 88, 95 e 97. Piloto · sprint 1.</footer>
+<footer class="wrap">Fonte: SEPLAN/PMSP (dados abertos) e BCB/IBGE. Projeto pessoal com dados abertos; não representa posição oficial da Prefeitura de São Paulo. · <a href="https://github.com/micadw/dsa-orcamento-cultura-sp">GitHub</a> · v0.1.0</footer>
 <div class="tip" id="tip"></div>
 
 <script>
 const F = {org:0,uni:1,fun:2,sub:3,prog:4,pa:5,desp:6,fonte:7,em:8,tipo:9,orc:10,sup:11,red:12,atu:13,cong:14,res:15,emp:16,liq:17,pago:18};
-let P, H, ROWS = [], state = {q:"", org:"", tipo:"", drill:{}, ent:"SMC", mode:"rs", dim:"prog"};
+const VALS = ["orc","sup","red","atu","cong","res","emp","liq","pago"];
+let P, H, IP, ROWS = [], state = {q:"", org:"25", tipo:"", drill:{}, ent:"SMC", mode:"real", dim:"prog"};
 const $ = s => document.querySelector(s);
 const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
-const mi = v => { const a=Math.abs(v); if(a>=1e9) return "R$ "+(v/1e9).toLocaleString("pt-BR",{maximumFractionDigits:2})+" bi"; if(a>=1e6) return "R$ "+(v/1e6).toLocaleString("pt-BR",{maximumFractionDigits:1})+" mi"; if(a>=1e3) return "R$ "+(v/1e3).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil"; return "R$ "+v.toLocaleString("pt-BR",{maximumFractionDigits:0}); };
+const mi = v => { if(!isFinite(v)) return "—"; const a=Math.abs(v); if(a>=1e9) return "R$ "+(v/1e9).toLocaleString("pt-BR",{maximumFractionDigits:2})+" bi"; if(a>=1e6) return "R$ "+(v/1e6).toLocaleString("pt-BR",{maximumFractionDigits:1})+" mi"; if(a>=1e3) return "R$ "+(v/1e3).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil"; return "R$ "+v.toLocaleString("pt-BR",{maximumFractionDigits:0}); };
 const pct = (a,b) => b ? a/b : NaN;
 const fp = x => isFinite(x) ? (x*100).toLocaleString("pt-BR",{maximumFractionDigits:1})+"%" : "—";
 const natFmt = d => `${d[0]}.${d[1]}.${d[2]}${d[3]}.${d[4]}${d[5]}.${d[6]}${d[7]}`;
 const codeOf = r => `${r[F.org]}.${r[F.uni]}.${r[F.fun]}.${r[F.sub]}.${r[F.prog]}.${r[F.pa]}.${natFmt(r[F.desp])}.${r[F.fonte]}`;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const slug = c => "dot-" + c.replace(/\./g,"-");
+const unslug = h => h.replace(/^dot-/,"").replace(/-/g,".");
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const tip = $("#tip");
-function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1; const x = Math.min(e.clientX+14, innerWidth-300); tip.style.left = x+"px"; tip.style.top = (e.clientY+14)+"px"; }
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(e.clientX+14, innerWidth-310)+"px"; tip.style.top = (e.clientY+14)+"px"; }
 function hideTip(){ tip.style.opacity = 0; }
+const status = x => !isFinite(x) ? "" : x >= .85 ? `<span class="pill good">alta</span>` : x >= .6 ? `<span class="pill warn">média</span>` : `<span class="pill crit">baixa</span>`;
+function sum(rows){ const s = {}; VALS.forEach(k=>s[k]=0); rows.forEach(o=>VALS.forEach(k=>s[k]+=o.r[F[k]])); return s; }
 
-Promise.all([fetch("data26.json").then(r=>r.json()), fetch("hist.json").then(r=>r.json())]).then(([p,h]) => {
-  P = p; H = h;
+Promise.all(["data26.json","hist.json","ipca.json"].map(f=>fetch(f).then(r=>{ if(!r.ok) throw new Error(f); return r.json(); }))).then(([p,h,ip]) => {
+  P = p; H = h; IP = ip;
   ROWS = P.data.map(r => { const c = codeOf(r); return {r, code:c, digits:c.replace(/\D/g,""), text:[P.dict.org[r[F.org]],P.dict.prog[r[F.prog]],P.dict.pa[r[F.pa]],P.dict.desp[r[F.desp]],P.dict.fonte[r[F.fonte]]].join(" ").toLowerCase()}; });
-  $("#meta").innerHTML = `Base de execução orçamentária do SOF, período <b>${P.ini} a ${P.fim}</b>, extraída em <b>${P.extr}</b> · ${ROWS.length} dotações neste recorte`;
+  $("#meta").innerHTML = `Execução orçamentária de <b>${P.ini} a ${P.fim}</b>, extraída em <b>${P.extr}</b> · ${ROWS.length} dotações da cultura · fonte SEPLAN/PMSP`;
   const orgs = [...new Set(P.data.map(r=>r[F.org]))].sort();
   $("#org").innerHTML = `<option value="">Todos do recorte</option>` + orgs.map(o=>`<option value="${o}">${o} · ${esc(P.dict.org[o])}</option>`).join("");
-  state.org = "25"; $("#org").value = "25";
-  bind(); render();
-}).catch(err => { $("#meta").textContent = "Não foi possível carregar os dados: " + err.message; });
+  $("#org").value = state.org;
+  bind(); renderInicio(); renderComoLer(); route();
+}).catch(err => { $("#meta").textContent = "Não foi possível carregar os dados (" + err.message + "). Tente recarregar a página."; });
+
+/* ---------- roteamento por #hash ---------- */
+function route(){
+  const h = location.hash.slice(1) || "inicio";
+  const view = h.startsWith("dot-") ? "ficha" : (["inicio","explorar","serie","como-ler"].includes(h) ? h : "inicio");
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-"+view));
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.view !== (view==="ficha"?"explorar":view)) a.removeAttribute("aria-current"); else a.setAttribute("aria-current","page"); });
+  if (view === "explorar") renderExplorar();
+  if (view === "serie") renderHist();
+  if (view === "ficha") renderFicha(unslug(h));
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
 
 function bind(){
-  let t; $("#q").addEventListener("input", e => { clearTimeout(t); t = setTimeout(()=>{ state.q = e.target.value.trim(); render(); }, 150); });
-  $("#org").addEventListener("change", e => { state.org = e.target.value; render(); });
-  $("#tipo").addEventListener("change", e => { state.tipo = e.target.value; render(); });
+  let t; $("#q").addEventListener("input", e => { clearTimeout(t); t = setTimeout(()=>{ state.q = e.target.value.trim(); renderExplorar(); }, 150); });
+  $("#org").addEventListener("change", e => { state.org = e.target.value; renderExplorar(); });
+  $("#tipo").addEventListener("change", e => { state.tipo = e.target.value; renderExplorar(); });
   $("#dim").addEventListener("change", e => { state.dim = e.target.value; renderBreak(sel()); });
-  $("#clear").addEventListener("click", () => { state = {...state, q:"", org:"", tipo:"", drill:{}}; $("#q").value=""; $("#org").value=""; $("#tipo").value=""; render(); });
-  document.querySelectorAll(".hint code").forEach(c => c.addEventListener("click", () => { $("#q").value = c.dataset.q; state.q = c.dataset.q; state.org=""; $("#org").value=""; render(); }));
+  $("#clear").addEventListener("click", () => { state = {...state, q:"", org:"", tipo:"", drill:{}}; $("#q").value=""; $("#org").value=""; $("#tipo").value=""; renderExplorar(); });
+  document.querySelectorAll(".hint code").forEach(c => c.addEventListener("click", () => { $("#q").value = c.dataset.q; state.q = c.dataset.q; state.org=""; $("#org").value=""; renderExplorar(); }));
   document.querySelectorAll("[data-ent]").forEach(b => b.addEventListener("click", () => { state.ent = b.dataset.ent; document.querySelectorAll("[data-ent]").forEach(x=>x.setAttribute("aria-pressed", x===b)); renderHist(); }));
   document.querySelectorAll("[data-mode]").forEach(b => b.addEventListener("click", () => { state.mode = b.dataset.mode; document.querySelectorAll("[data-mode]").forEach(x=>x.setAttribute("aria-pressed", x===b)); renderHist(); }));
   $("#copy").addEventListener("click", copyCSV);
-  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(render, 150); });
+  $("#dl").addEventListener("click", downloadCSV);
+  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(route, 200); });
 }
 
+/* ---------- INÍCIO ---------- */
+function acoes(org){
+  const g = {};
+  ROWS.filter(o => o.r[F.org] === org).forEach(o => { const k = o.r[F.pa]; const a = g[k] || (g[k] = {pa:k, rows:[], ...Object.fromEntries(VALS.map(v=>[v,0]))}); a.rows.push(o); VALS.forEach(v => a[v] += o.r[F[v]]); });
+  return Object.values(g);
+}
+function renderInicio(){
+  const smc = sum(ROWS.filter(o=>o.r[F.org]==="25"));
+  const dAtu = pct(smc.atu - smc.orc, smc.orc);
+  $("#headline").innerHTML = `A Secretaria Municipal de Cultura começou 2026 com <b>${mi(smc.orc)}</b> aprovados na lei orçamentária. Com créditos adicionais, o valor chegou a <b>${mi(smc.atu)}</b> (${dAtu>=0?"+":""}${fp(dAtu)}). Até ${esc(P.extr)}, <b>${fp(pct(smc.emp,smc.atu))}</b> foi empenhado e <b>${fp(pct(smc.pago,smc.atu))}</b> pago.`;
+  $("#h-tiles").innerHTML = [["Orçado inicial (LOA)",smc.orc,"aprovado pela Câmara"],["Atualizado",smc.atu,"após créditos e reduções"],["Empenhado",smc.emp,fp(pct(smc.emp,smc.atu))+" do atualizado"],["Pago",smc.pago,fp(pct(smc.pago,smc.atu))+" do atualizado"]]
+    .map(([k,v,d]) => `<div class="tile"><div class="k">${k}</div><div class="v">${mi(v)}</div><div class="d">${d}</div></div>`).join("");
+  // alertas por regra, nas ações dos órgãos 25 e 79
+  const al = [];
+  ["25","79"].forEach(org => acoes(org).forEach(a => {
+    const nome = `${a.pa} · ${P.dict.pa[a.pa]||""}`, alvo = a.rows.sort((x,y)=>y.r[F.orc]-x.r[F.orc])[0].code;
+    if (a.orc >= 1e6 && a.atu < a.orc*0.5) al.push({sev:"crit", ord:a.orc-a.atu, alvo, t:`Corte de ${fp(1-a.atu/a.orc)} no orçamento`, m:`${esc(nome)} (${esc(P.dict.org[org])}): de ${mi(a.orc)} aprovados para ${mi(a.atu)}.`});
+    else if (a.atu >= 2e6 && pct(a.emp,a.atu) < .5) al.push({sev:"warn", ord:a.atu-a.emp, alvo, t:`Só ${fp(pct(a.emp,a.atu))} empenhado`, m:`${esc(nome)}: ${mi(a.atu-a.emp)} ainda sem empenho a pouco mais de um mês do fim do ano.`});
+    if (a.cong >= 1e6) al.push({sev:"warn", ord:a.cong, alvo, t:`${mi(a.cong)} congelados`, m:`${esc(nome)}: valor bloqueado para empenho.`});
+  }));
+  al.sort((x,y)=> (x.sev===y.sev?0:x.sev==="crit"?-1:1) || y.ord-x.ord);
+  $("#alerts").innerHTML = al.slice(0,6).map(a => `<div class="alert ${a.sev}" tabindex="0" data-c="${a.alvo}"><span class="pill ${a.sev}">${a.sev==="crit"?"crítico":"atenção"}</span><div><div class="t">${a.t}</div><div class="m">${a.m}</div></div></div>`).join("") || `<p class="empty">Nenhum alerta pelas regras atuais.</p>`;
+  document.querySelectorAll(".alert").forEach(el => { const go = () => location.hash = slug(el.dataset.c); el.addEventListener("click", go); el.addEventListener("keydown", e => { if(e.key==="Enter") go(); }); });
+  // top ações
+  const top = acoes("25").sort((a,b)=>b.atu-a.atu).slice(0,7), mx = Math.max(...top.map(a=>a.atu),1);
+  $("#top").innerHTML = `<thead><tr><th>Ação</th><th class="n">Atualizado</th><th style="min-width:90px"></th><th class="n">% emp.</th></tr></thead><tbody>` +
+    top.map(a => `<tr class="click" tabindex="0" data-pa="${a.pa}"><td><span class="note">${a.pa}</span> ${esc(P.dict.pa[a.pa]||"")}</td><td class="n">${mi(a.atu)}</td><td><div class="hb" style="width:${a.atu/mx*100}%"></div></td><td class="n">${fp(pct(a.emp,a.atu))} ${status(pct(a.emp,a.atu))}</td></tr>`).join("") + `</tbody>`;
+  document.querySelectorAll("#top tr.click").forEach(tr => { const go = () => { state.org="25"; state.q=""; state.drill={pa:tr.dataset.pa}; $("#org").value="25"; $("#q").value=""; location.hash="explorar"; }; tr.addEventListener("click", go); tr.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); }); });
+  // mini-série real
+  const ys = Object.keys(H.SMC).map(Number).sort((a,b)=>a-b), f = y => IP.fator[y] || 1;
+  const atu = ys.map(y => H.SMC[y][1]*f(y)), pg = ys.map(y => H.SMC[y][4]*f(y));
+  const svg = $("#spark"), W = svg.clientWidth || 800, Hh = 140, m = {l:8,r:70,t:10,b:22}, mx2 = Math.max(...atu)*1.05;
+  const X = i => m.l + i/(ys.length-1)*(W-m.l-m.r), Y = v => Hh-m.b - v/mx2*(Hh-m.t-m.b);
+  const line = (arr,c) => `<path d="${arr.map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+","+Y(v).toFixed(1)).join("")}" fill="none" stroke="${c}" stroke-width="2"></path><circle cx="${X(arr.length-1)}" cy="${Y(arr[arr.length-1])}" r="4" fill="${c}" stroke="var(--surface)" stroke-width="2"></circle>`;
+  svg.innerHTML = line(atu,"var(--s1)") + line(pg,"var(--s3)") + `<text x="${X(ys.length-1)+8}" y="${Y(atu.at(-1))+4}">${mi(atu.at(-1))}</text><text x="${m.l}" y="${Hh-6}">${ys[0]}</text><text x="${X(ys.length-1)}" y="${Hh-6}" text-anchor="end">${ys.at(-1)}</text>`;
+  const pico = ys[atu.indexOf(Math.max(...atu))];
+  $("#spark-lede").innerHTML = `<span style="color:var(--s1)">━</span> atualizado · <span style="color:var(--s3)">━</span> pago, em R$ de ${IP.base.slice(5)}/${IP.base.slice(0,4)}. Maior orçamento atualizado da série: ${pico}. <a href="#serie">Ver série completa</a>.`;
+}
+
+/* ---------- EXPLORAR ---------- */
 function sel(){
-  const q = state.q.toLowerCase(); const hasLetters = /[a-zà-ú]/i.test(q); const qd = q.replace(/\D/g,"");
+  const q = state.q.toLowerCase(), hasLetters = /[a-zà-ú]/i.test(q), qd = q.replace(/\D/g,"");
   return ROWS.filter(o => {
     const r = o.r;
     if (state.org && r[F.org] !== state.org) return false;
@@ -242,91 +396,136 @@ function sel(){
     for (const k in state.drill) if (r[F[k]] !== state.drill[k]) return false;
     if (q) {
       if (hasLetters) { if (!q.split(/\s+/).every(w => o.text.includes(w))) return false; }
-      else if (qd) {
-        // prefixo do código completo, ou da natureza da despesa (ex.: 3.3.50)
-        if (!o.digits.startsWith(qd) && !r[F.desp].startsWith(qd)) return false;
-      }
+      else if (qd && !o.digits.startsWith(qd) && !r[F.desp].startsWith(qd)) return false;
     }
     return true;
   });
 }
-function sum(rows){ const s = {orc:0,sup:0,red:0,atu:0,cong:0,res:0,emp:0,liq:0,pago:0}; rows.forEach(o=>{ for(const k in s) s[k]+=o.r[F[k]]; }); return s; }
-
-function render(){
-  const rows = sel();
-  renderChips();
+function renderExplorar(){
+  if (!P) return;
+  const rows = sel(); renderChips();
   const s = sum(rows);
   const lbl = state.q ? `“${esc(state.q)}”` : (state.org ? `órgão ${state.org} · ${esc(P.dict.org[state.org])}` : "todo o recorte da Cultura");
   $("#sumlede").innerHTML = rows.length ? `${rows.length} dotações · ${lbl}` : `Nenhuma dotação para ${lbl}. Tente um prefixo menor ou limpe os filtros.`;
   const dAtu = pct(s.atu - s.orc, s.orc);
-  $("#tiles").innerHTML = [
-    ["Orçado inicial (LOA)", mi(s.orc), "aprovado pela Câmara"],
-    ["Atualizado", mi(s.atu), isFinite(dAtu) ? `${dAtu>=0?"+":""}${fp(dAtu)} vs. inicial` : ""],
-    ["Empenhado", mi(s.emp), fp(pct(s.emp,s.atu))+" do atualizado"],
-    ["Liquidado", mi(s.liq), fp(pct(s.liq,s.atu))+" do atualizado"],
-    ["Pago", mi(s.pago), fp(pct(s.pago,s.atu))+" do atualizado"],
-    ["Congelado", mi(s.cong), "indisponível para empenho"]
-  ].map(([k,v,d]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
-  const status = x => !isFinite(x) ? "" : x >= .85 ? `<span class="pill good">alta</span>` : x >= .6 ? `<span class="pill warn">média</span>` : `<span class="pill crit">baixa</span>`;
+  $("#tiles").innerHTML = [["Orçado inicial (LOA)", mi(s.orc), "aprovado pela Câmara"],["Atualizado", mi(s.atu), isFinite(dAtu) ? `${dAtu>=0?"+":""}${fp(dAtu)} vs. inicial` : ""],["Empenhado", mi(s.emp), fp(pct(s.emp,s.atu))+" do atualizado"],["Liquidado", mi(s.liq), fp(pct(s.liq,s.atu))+" do atualizado"],["Pago", mi(s.pago), fp(pct(s.pago,s.atu))+" do atualizado"],["Congelado", mi(s.cong), "indisponível para empenho"]]
+    .map(([k,v,d]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`).join("");
   const rates = [["Execução do empenho","empenhado ÷ atualizado",pct(s.emp,s.atu)],["Liquidação","liquidado ÷ empenhado",pct(s.liq,s.emp)],["Pagamento","pago ÷ liquidado",pct(s.pago,s.liq)],["Créditos adicionais","suplementado − reduzido",null]];
   $("#rates").innerHTML = rates.map(([k,d,x]) => x===null
     ? `<div class="rate"><div class="top"><span>${k}<br><span class="note">${d}</span></span><b>${mi(s.sup - s.red)}</b></div><div class="note">+${mi(s.sup)} suplementado · −${mi(s.red)} reduzido</div></div>`
     : `<div class="rate"><div class="top"><span>${k} ${status(x)}<br><span class="note">${d}</span></span><b>${fp(x)}</b></div><div class="meter"><i style="width:${Math.max(0,Math.min(1,x||0))*100}%"></i></div></div>`).join("");
-  renderFunnel(s); renderStats(rows); renderHist(); renderBreak(rows); renderRaw(rows);
+  renderFunnel(s); renderStats(rows); renderBreak(rows); renderRaw(rows);
 }
-
 function renderChips(){
-  const c = Object.entries(state.drill).map(([k,v]) => `<button class="chip" type="button" data-k="${k}">${({prog:"Programa",pa:"Proj./Ativ.",desp:"Natureza",fonte:"Fonte",org:"Órgão",sub:"Subfunção"})[k]}: ${esc(v)} · ${esc((P.dict[k]||{})[v]||"")} ✕</button>`).join("");
-  $("#chips").innerHTML = c;
-  document.querySelectorAll("#chips .chip").forEach(b => b.addEventListener("click", () => { delete state.drill[b.dataset.k]; render(); }));
+  const nm = {prog:"Programa",pa:"Proj./Ativ.",desp:"Natureza",fonte:"Fonte",org:"Órgão",sub:"Subfunção"};
+  $("#chips").innerHTML = Object.entries(state.drill).map(([k,v]) => `<button class="chip" type="button" data-k="${k}">${nm[k]}: ${esc(v)} · ${esc((P.dict[k]||{})[v]||"")} ✕</button>`).join("");
+  document.querySelectorAll("#chips .chip").forEach(b => b.addEventListener("click", () => { delete state.drill[b.dataset.k]; renderExplorar(); }));
 }
-
 function renderFunnel(s){
   const svg = $("#funnel"), W = svg.clientWidth || 520, steps = [["Orçado inicial",s.orc,"#86b6ef"],["Atualizado",s.atu,"#5598e7"],["Empenhado",s.emp,"#2a78d6"],["Liquidado",s.liq,"#1c5cab"],["Pago",s.pago,"#104281"]];
-  const max = Math.max(...steps.map(d=>d[1]), 1), lw = 110, rw = 92, bw = W - lw - rw, bh = 26, gap = 14;
+  const max = Math.max(...steps.map(d=>d[1]), 1), lw = 110, rw = 92, bw = Math.max(40, W - lw - rw), bh = 26, gap = 14;
   svg.innerHTML = steps.map(([k,v,c],i) => { const y = 14 + i*(bh+gap), w = Math.max(2, v/max*bw);
     return `<g class="fb" data-i="${i}"><text x="0" y="${y+bh/2+4}">${k}</text><rect x="${lw}" y="${y}" width="${w}" height="${bh}" rx="4" fill="${c}"></rect><text x="${lw+w+8}" y="${y+bh/2+4}" style="fill:var(--ink);font-variant-numeric:tabular-nums">${mi(v)}</text><rect x="0" y="${y-6}" width="${W}" height="${bh+12}" fill="transparent"></rect></g>`; }).join("");
   svg.querySelectorAll(".fb").forEach(g => { const [k,v] = steps[+g.dataset.i]; g.addEventListener("mousemove", e => showTip(e, `<b>${k}</b><br>${brl(v)}<br>${fp(pct(v,s.atu))} do atualizado`)); g.addEventListener("mouseleave", hideTip); });
 }
-
 function quant(a,q){ if(!a.length) return NaN; const p=(a.length-1)*q, b=Math.floor(p); return a[b] + (a[Math.min(b+1,a.length-1)]-a[b])*(p-b); }
 function renderStats(rows){
-  const v = rows.map(o=>o.r[F.atu]).filter(x=>x>0).sort((a,b)=>a-b);
-  const n = v.length, tot = v.reduce((a,b)=>a+b,0), mean = n? tot/n : NaN;
-  const sd = n>1 ? Math.sqrt(v.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)) : NaN;
-  const top10 = v.slice(-Math.max(1,Math.ceil(n*.1))).reduce((a,b)=>a+b,0);
-  const items = [["N dotações",n.toLocaleString("pt-BR")],["Média",mi(mean)],["Mediana",mi(quant(v,.5))],["1º quartil",mi(quant(v,.25))],["3º quartil",mi(quant(v,.75))],["Máximo",mi(v[n-1]||0)],["Desvio-padrão",mi(sd)],["Coef. de variação",isFinite(sd/mean)?(sd/mean).toLocaleString("pt-BR",{maximumFractionDigits:2}):"—"],["10% maiores concentram",fp(pct(top10,tot))]];
-  $("#stats").innerHTML = n ? items.map(([k,x])=>`<div><span class="note">${k}</span><b>${x.replace("R$ NaN","—")}</b></div>`).join("") : `<div class="empty">Sem dotações com valor atualizado.</div>`;
-  // histograma da taxa de empenho
-  const rates = rows.filter(o=>o.r[F.atu]>0).map(o=>Math.min(1, o.r[F.emp]/o.r[F.atu]));
-  const bins = Array(10).fill(0); rates.forEach(x => bins[Math.min(9, Math.floor(x*10))]++);
+  const v = rows.map(o=>o.r[F.atu]).filter(x=>x>0).sort((a,b)=>a-b), n = v.length, tot = v.reduce((a,b)=>a+b,0), mean = n? tot/n : NaN;
+  const sd = n>1 ? Math.sqrt(v.reduce((a,b)=>a+(b-mean)**2,0)/(n-1)) : NaN, top10 = v.slice(-Math.max(1,Math.ceil(n*.1))).reduce((a,b)=>a+b,0);
+  const items = [["N dotações",n.toLocaleString("pt-BR")],["Média",mi(mean)],["Mediana",mi(quant(v,.5))],["1º quartil",mi(quant(v,.25))],["3º quartil",mi(quant(v,.75))],["Máximo",mi(v[n-1])],["Desvio-padrão",mi(sd)],["Coef. de variação",isFinite(sd/mean)?(sd/mean).toLocaleString("pt-BR",{maximumFractionDigits:2}):"—"],["10% maiores concentram",fp(pct(top10,tot))]];
+  $("#stats").innerHTML = n ? items.map(([k,x])=>`<div><span class="note">${k}</span><b>${x}</b></div>`).join("") : `<div class="empty">Sem dotações com valor atualizado.</div>`;
+  const rates = rows.filter(o=>o.r[F.atu]>0).map(o=>Math.min(1, o.r[F.emp]/o.r[F.atu])), bins = Array(10).fill(0); rates.forEach(x => bins[Math.min(9, Math.floor(x*10))]++);
   const svg = $("#histo"), W = svg.clientWidth || 400, Hh = 120, pb = 20, mx = Math.max(...bins,1), bw = (W-10)/10;
   svg.innerHTML = bins.map((c,i) => { const h = c/mx*(Hh-pb-14), x = 5+i*bw;
-    return `<g class="hb2" data-i="${i}"><rect x="${x+1}" y="${Hh-pb-h}" width="${bw-2}" height="${h}" rx="3" fill="var(--s1)"></rect><rect x="${x}" y="0" width="${bw}" height="${Hh-pb}" fill="transparent"></rect>${i%2===0?`<text x="${x}" y="${Hh-5}">${i*10}%</text>`:""}</g>`; }).join("") + `<text x="${W-30}" y="${Hh-5}">100%</text><line x1="5" x2="${W-5}" y1="${Hh-pb}" y2="${Hh-pb}" stroke="var(--line)"></line>`;
+    return `<g class="hb2" data-i="${i}"><rect x="${x+1}" y="${Hh-pb-h}" width="${Math.max(1,bw-2)}" height="${h}" rx="3" fill="var(--s1)"></rect><rect x="${x}" y="0" width="${bw}" height="${Hh-pb}" fill="transparent"></rect>${i%2===0?`<text x="${x}" y="${Hh-5}">${i*10}%</text>`:""}</g>`; }).join("") + `<text x="${W-34}" y="${Hh-5}">100%</text><line x1="5" x2="${W-5}" y1="${Hh-pb}" y2="${Hh-pb}" stroke="var(--line)"></line>`;
   svg.querySelectorAll(".hb2").forEach(g => { const i=+g.dataset.i; g.addEventListener("mousemove", e=>showTip(e, `${i*10}–${i===9?100:i*10+10}% empenhado<br><b>${bins[i]}</b> dotações`)); g.addEventListener("mouseleave", hideTip); });
 }
+function renderBreak(rows){
+  const dim = state.dim, idx = F[dim], groups = {};
+  rows.forEach(o => { const k = o.r[idx]; const g = groups[k] || (groups[k] = {k, n:0, orc:0, atu:0, emp:0, pago:0}); g.n++; g.orc+=o.r[F.orc]; g.atu+=o.r[F.atu]; g.emp+=o.r[F.emp]; g.pago+=o.r[F.pago]; });
+  const arr = Object.values(groups).sort((a,b)=>b.atu-a.atu), mx = Math.max(...arr.map(g=>g.atu),1), label = k => dim==="desp" ? natFmt(k) : k;
+  $("#brk").innerHTML = `<thead><tr><th>Código</th><th>Descrição</th><th class="n">Dotações</th><th class="n">Orçado</th><th class="n">Atualizado</th><th style="min-width:120px"></th><th class="n">Empenhado</th><th class="n">% emp.</th><th class="n">Pago</th></tr></thead><tbody>` +
+    (arr.length ? arr.map(g => `<tr class="click" data-k="${esc(g.k)}" tabindex="0"><td class="code">${esc(label(g.k))}</td><td>${esc((P.dict[dim]||{})[g.k]||"")}</td><td class="n">${g.n}</td><td class="n">${mi(g.orc)}</td><td class="n">${mi(g.atu)}</td><td><div class="hb" style="width:${g.atu/mx*100}%"></div></td><td class="n">${mi(g.emp)}</td><td class="n">${fp(pct(g.emp,g.atu))}</td><td class="n">${mi(g.pago)}</td></tr>`).join("") : `<tr><td colspan="9" class="empty">Nada a agrupar.</td></tr>`) + `</tbody>`;
+  document.querySelectorAll("#brk tr.click").forEach(tr => { const go = () => { state.drill[dim] = tr.dataset.k; renderExplorar(); }; tr.addEventListener("click", go); tr.addEventListener("keydown", e => { if (e.key==="Enter") go(); }); });
+}
+function renderRaw(rows){
+  const sorted = [...rows].sort((a,b)=>b.r[F.atu]-a.r[F.atu]), show = sorted.slice(0,300);
+  $("#raw").innerHTML = `<thead><tr><th>Dotação</th><th>Projeto / Atividade</th><th>Natureza</th><th>Crédito</th><th>Emenda</th><th class="n">Orçado</th><th class="n">Atualizado</th><th class="n">Empenhado</th><th class="n">Pago</th><th class="n">% emp.</th></tr></thead><tbody>` +
+    show.map(o => { const r = o.r; return `<tr class="click" tabindex="0" data-c="${o.code}"><td class="code">${o.code}</td><td>${esc(P.dict.pa[r[F.pa]])}</td><td>${esc(P.dict.desp[r[F.desp]])}</td><td>${r[F.tipo]}</td><td class="code">${esc(r[F.em])}</td><td class="n">${brl(r[F.orc])}</td><td class="n">${brl(r[F.atu])}</td><td class="n">${brl(r[F.emp])}</td><td class="n">${brl(r[F.pago])}</td><td class="n">${fp(pct(r[F.emp],r[F.atu]))}</td></tr>`; }).join("") +
+    (sorted.length > 300 ? `<tr><td colspan="10" class="note">Mostrando as 300 maiores de ${sorted.length}. O download traz todas.</td></tr>` : "") + `</tbody>`;
+  document.querySelectorAll("#raw tr.click").forEach(tr => { const go = () => location.hash = slug(tr.dataset.c); tr.addEventListener("click", go); tr.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); }); });
+}
+function csvText(){
+  const head = ["dotacao","orgao","programa","projeto_atividade","natureza","fonte","tipo_credito","emenda","orcado","suplementado","reduzido","atualizado","congelado","reservado","empenhado","liquidado","pago"];
+  const q = s => `"${String(s??"").replace(/"/g,'""')}"`;
+  return [head.join(";")].concat(sel().map(o => { const r=o.r; return [o.code, q(P.dict.org[r[F.org]]), q(P.dict.prog[r[F.prog]]), q(P.dict.pa[r[F.pa]]), q(P.dict.desp[r[F.desp]]), q(P.dict.fonte[r[F.fonte]]), r[F.tipo], r[F.em], ...VALS.map(k=>String(r[F[k]]).replace(".",","))].join(";"); })).join("\n");
+}
+function downloadCSV(){
+  try { const b = new Blob(["﻿"+csvText()], {type:"text/csv;charset=utf-8"}); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `cultura_pmsp_${(P.extr||"").split("/").reverse().join("-")}.csv`; document.body.appendChild(a); a.click(); a.remove(); $("#copymsg").textContent = `${sel().length} linhas baixadas (separador ;).`; }
+  catch(e){ copyCSV(); }
+}
+async function copyCSV(){
+  try { await navigator.clipboard.writeText(csvText()); $("#copymsg").textContent = `${sel().length} linhas copiadas. Cole numa planilha.`; }
+  catch(e){ $("#copymsg").textContent = "O navegador bloqueou a cópia. Use os arquivos oficiais em Como ler."; }
+}
 
+/* ---------- FICHA DA DOTAÇÃO ---------- */
+function partes(code){
+  const p = code.split("."), nat = p.slice(6,11).join(".");
+  return [["Órgão",p[0],P.dict.org[p[0]]],["Unidade",p[1],""],["Função",p[2],p[2]==="13"?"Cultura":""],["Subfunção",p[3],P.dict.sub[p[3]]],["Programa",p[4],P.dict.prog[p[4]]],["Projeto/Atividade",p[5],P.dict.pa[p[5]]],["Natureza",nat,P.dict.desp[nat.replace(/\./g,"")]],["Fonte",p[11],P.dict.fonte[p[11]]]];
+}
+function renderFicha(code){
+  const rows = ROWS.filter(o => o.code === code), box = $("#ficha");
+  if (!rows.length) { box.innerHTML = `<h2>Dotação não encontrada</h2><p class="lede">O código <code>${esc(code)}</code> não está no recorte atual. <a href="#explorar">Voltar para Explorar</a>.</p>`; return; }
+  const s = sum(rows), r0 = rows[0].r, irmas = ROWS.filter(o => o.r[F.org]===r0[F.org] && o.r[F.pa]===r0[F.pa] && o.code!==code);
+  const ems = [...new Set(rows.map(o=>o.r[F.em]).filter(Boolean))];
+  const linha = [["Orçado inicial (LOA)", s.orc, "aprovado pela Câmara", s.orc>0],["+ Suplementado", s.sup, "créditos adicionais no ano", s.sup>0],["− Reduzido", -s.red, "anulações para cobrir outras dotações", s.red>0],["= Atualizado", s.atu, fp(pct(s.atu-s.orc,s.orc))+" vs. inicial", true],["Congelado", s.cong, "bloqueado para empenho", s.cong>0],["Empenhado", s.emp, fp(pct(s.emp,s.atu))+" do atualizado", s.emp>0],["Liquidado", s.liq, fp(pct(s.liq,s.emp))+" do empenhado", s.liq>0],["Pago", s.pago, fp(pct(s.pago,s.liq))+" do liquidado", s.pago>0]];
+  box.innerHTML = `<h2>${esc(P.dict.pa[r0[F.pa]])}</h2>
+    <p class="lede">${esc(P.dict.org[r0[F.org]])} · ${esc(P.dict.desp[r0[F.desp]])} · ${rows.length} registro(s) na base (${[...new Set(rows.map(o=>o.r[F.tipo]))].join(", ")})${ems.length?` · <b>emenda parlamentar nº ${ems.map(esc).join(", ")}</b>`:""}</p>
+    <div class="codebar">${partes(code).map(([l,c,x])=>`<div class="part"><div class="l">${l}</div><div class="c">${esc(c)}</div><div class="x">${esc(x||"")}</div></div>`).join("")}</div>
+    <div class="grid2"><div>
+      <h3>Linha do tempo em 2026</h3>
+      <ol class="steps">${linha.map(([k,v,m,on])=>`<li><span class="dot ${on?"":"off"}"></span><div>${k}<div class="m">${m}</div></div><span class="v">${brl(v)}</span></li>`).join("")}</ol>
+      <p class="note">Ainda nesta ficha, nas próximas versões: emendas da Câmara, decretos de crédito do Diário Oficial e os empenhos com credores (API-SOF).</p>
+    </div><div>
+      <h3>Situação</h3>
+      <div class="rates" style="margin-top:0">${[["Execução do empenho",pct(s.emp,s.atu)],["Liquidação",pct(s.liq,s.emp)],["Pagamento",pct(s.pago,s.liq)]].map(([k,x])=>`<div class="rate"><div class="top"><span>${k} ${status(x)}</span><b>${fp(x)}</b></div><div class="meter"><i style="width:${Math.max(0,Math.min(1,x||0))*100}%"></i></div></div>`).join("")}</div>
+      <h3>Compartilhar</h3>
+      <p><code style="font-size:.78rem;word-break:break-all">${esc(location.href.split("#")[0])}#${slug(code)}</code></p>
+      <button type="button" class="ghost" id="share">Copiar link desta dotação</button> <span class="note" id="sharemsg"></span>
+    </div></div>
+    <h3>Outras dotações da mesma ação (${irmas.length})</h3>
+    <div class="tblwrap"><table><thead><tr><th>Dotação</th><th>Natureza</th><th class="n">Atualizado</th><th class="n">Empenhado</th><th class="n">% emp.</th></tr></thead><tbody>${
+      Object.values(irmas.reduce((g,o)=>{ const a=g[o.code]||(g[o.code]={code:o.code,desp:o.r[F.desp],atu:0,emp:0}); a.atu+=o.r[F.atu]; a.emp+=o.r[F.emp]; return g; },{})).sort((a,b)=>b.atu-a.atu)
+      .map(a=>`<tr class="click" tabindex="0" data-c="${a.code}"><td class="code">${a.code}</td><td>${esc(P.dict.desp[a.desp])}</td><td class="n">${brl(a.atu)}</td><td class="n">${brl(a.emp)}</td><td class="n">${fp(pct(a.emp,a.atu))}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Nenhuma outra dotação nesta ação.</td></tr>`
+    }</tbody></table></div>`;
+  box.querySelectorAll("tr.click").forEach(tr => tr.addEventListener("click", () => location.hash = slug(tr.dataset.c)));
+  $("#share").addEventListener("click", async () => { try { await navigator.clipboard.writeText(location.href); $("#sharemsg").textContent = "Link copiado."; } catch(e){ $("#sharemsg").textContent = "Copie o endereço acima."; } });
+}
+
+/* ---------- SÉRIE ---------- */
 function renderHist(){
-  const ent = H[state.ent], years = Object.keys(ent).map(Number).sort((a,b)=>a-b);
+  if (!H) return;
+  const ent = H[state.ent], years = Object.keys(ent).map(Number).sort((a,b)=>a-b), f = y => IP.fator[y] || 1;
   const names = {SMC:"Secretaria Municipal de Cultura (órgão 25)", F13:"Função 13 · Cultura, somando todos os órgãos", FMC:"Fundo Municipal de Cultura (órgão 79)"};
   let series, fmt;
-  if (state.mode === "rs") { series = [["Orçado inicial",0,"var(--neutral)",true],["Atualizado",1,"var(--s1)"],["Empenhado",2,"var(--s2)"],["Pago",4,"var(--s3)"]]; fmt = mi; }
+  if (state.mode === "rs" || state.mode === "real") { series = [["Orçado inicial",0,"var(--neutral)",true],["Atualizado",1,"var(--s1)"],["Empenhado",2,"var(--s2)"],["Pago",4,"var(--s3)"]]; fmt = mi; }
   else if (state.mode === "pct") { series = [["Empenhado ÷ atualizado","e","var(--s2)"],["Pago ÷ atualizado","p","var(--s3)"],["Atualizado ÷ orçado","a","var(--s1)"]]; fmt = fp; }
   else { series = [["Orçado inicial / PMSP","so","var(--neutral)",true],["Atualizado / PMSP","sa","var(--s1)"]]; fmt = x => isFinite(x)?(x*100).toLocaleString("pt-BR",{maximumFractionDigits:2})+"%":"—"; }
-  const val = (y,k) => { const a = ent[y], pm = H.PMSP[y]; if (typeof k === "number") return a[k];
+  const val = (y,k) => { const a = ent[y], pm = H.PMSP[y]; if (typeof k === "number") return a[k] * (state.mode==="real" ? f(y) : 1);
     return {e:pct(a[2],a[1]), p:pct(a[4],a[1]), a:pct(a[1],a[0]), so:pct(a[0],pm[0]), sa:pct(a[1],pm[1])}[k]; };
-  $("#histlede").textContent = names[state.ent] + (state.mode==="share" ? " como parcela do orçamento total da Prefeitura." : state.mode==="pct" ? ": taxas de execução por exercício." : ": valores por exercício.");
+  const base = `${IP.base.slice(5)}/${IP.base.slice(0,4)}`;
+  $("#histlede").textContent = names[state.ent] + ({real:`: valores corrigidos pelo IPCA, em R$ de ${base}.`, rs:": valores nominais de cada ano.", pct:": taxas de execução por exercício.", share:" como parcela do orçamento total da Prefeitura."})[state.mode];
   $("#hleg").innerHTML = series.map(([n,,c,d]) => `<span><i style="background:${c};${d?"opacity:.8":""}"></i>${n}</span>`).join("");
-  const svg = $("#hist"), W = svg.clientWidth || 900, Hh = 300, m = {l:70,r:16,t:12,b:26};
+  $("#histnote").textContent = `2026 é exercício em andamento. ${state.mode==="real"?`Correção: fator = IPCA de ${base} ÷ IPCA de dezembro de cada ano (BCB/SGS 433).`:""} O Fundo Municipal de Cultura não aparece como órgão próprio na base entre 2018 e 2025.`;
+  const svg = $("#hist"), W = svg.clientWidth || 900, Hh = 320, m = {l:74,r:16,t:12,b:26};
   const all = years.flatMap(y => series.map(s => val(y,s[1]))).filter(isFinite);
   let ymax = Math.max(...all, state.mode==="pct"?1:0) * 1.08; if (!isFinite(ymax) || ymax<=0) ymax = 1;
   const x0 = 2003, x1 = 2026, X = y => m.l + (y-x0)/(x1-x0)*(W-m.l-m.r), Y = v => Hh-m.b - v/ymax*(Hh-m.t-m.b);
-  const ticks = 5, tk = [...Array(ticks+1)].map((_,i)=>ymax/ticks*i);
-  let g = tk.map(t => `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"></line><text x="${m.l-8}" y="${Y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join("");
+  let g = [...Array(6)].map((_,i)=>ymax/5*i).map(t => `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"></line><text x="${m.l-8}" y="${Y(t)+4}" text-anchor="end">${fmt(t)}</text>`).join("");
   g += [2003,2007,2011,2015,2019,2023,2026].map(y => `<text x="${X(y)}" y="${Hh-8}" text-anchor="middle">${y}</text>`).join("");
   series.forEach(([n,k,c,dash]) => {
     const pts = years.map(y => [y, val(y,k)]).filter(p => isFinite(p[1]));
-    // quebra a linha onde faltam anos
     let d = "", prev = null; pts.forEach(([y,v]) => { d += (prev!==null && y-prev===1 ? "L" : "M") + X(y).toFixed(1) + "," + Y(v).toFixed(1); prev = y; });
     g += `<path d="${d}" fill="none" stroke="${c}" stroke-width="2" ${dash?'stroke-dasharray="5 4"':""} stroke-linejoin="round"></path>`;
     const last = pts[pts.length-1]; if (last) g += `<circle cx="${X(last[0])}" cy="${Y(last[1])}" r="4" fill="${c}" stroke="var(--surface)" stroke-width="2"></circle>`;
@@ -336,38 +535,19 @@ function renderHist(){
   svg.innerHTML = g;
   const xh = svg.querySelector("#xh");
   svg.querySelector("#hov").addEventListener("mousemove", e => {
-    const r = svg.getBoundingClientRect(), px = e.clientX - r.left, y = Math.round(x0 + (px-m.l)/(W-m.l-m.r)*(x1-x0));
+    const r = svg.getBoundingClientRect(), y = Math.round(x0 + (e.clientX - r.left - m.l)/(W-m.l-m.r)*(x1-x0));
     if (!ent[y]) { hideTip(); xh.setAttribute("opacity",0); return; }
     xh.setAttribute("x1",X(y)); xh.setAttribute("x2",X(y)); xh.setAttribute("opacity",1);
-    showTip(e, `<b>${y}${y===2026?" (parcial)":""}</b><br>` + series.map(([n,k]) => `${n}: <b>${fmt(val(y,k))}</b>`).join("<br>"));
+    showTip(e, `<b>${y}${y===2026?" (parcial)":""}</b>${state.mode==="real"?` · IPCA no ano ${(IP.ipca_ano[y]??0).toLocaleString("pt-BR")}%`:""}<br>` + series.map(([n,k]) => `${n}: <b>${fmt(val(y,k))}</b>`).join("<br>"));
   });
   svg.querySelector("#hov").addEventListener("mouseleave", () => { hideTip(); xh.setAttribute("opacity",0); });
 }
 
-function renderBreak(rows){
-  const dim = state.dim, idx = F[dim], groups = {};
-  rows.forEach(o => { const k = o.r[idx]; const g = groups[k] || (groups[k] = {k, n:0, orc:0, atu:0, emp:0, pago:0}); g.n++; g.orc+=o.r[F.orc]; g.atu+=o.r[F.atu]; g.emp+=o.r[F.emp]; g.pago+=o.r[F.pago]; });
-  const arr = Object.values(groups).sort((a,b)=>b.atu-a.atu), mx = Math.max(...arr.map(g=>g.atu),1);
-  const label = k => dim==="desp" ? natFmt(k) : k;
-  $("#brk").innerHTML = `<thead><tr><th>Código</th><th>Descrição</th><th class="n">Dotações</th><th class="n">Orçado</th><th class="n">Atualizado</th><th style="min-width:120px"></th><th class="n">Empenhado</th><th class="n">% emp.</th><th class="n">Pago</th></tr></thead><tbody>` +
-    (arr.length ? arr.map(g => `<tr class="click" data-k="${esc(g.k)}" tabindex="0"><td class="code">${esc(label(g.k))}</td><td>${esc((P.dict[dim]||{})[g.k]||"")}</td><td class="n">${g.n}</td><td class="n">${mi(g.orc)}</td><td class="n">${mi(g.atu)}</td><td><div class="hb" style="width:${g.atu/mx*100}%"></div></td><td class="n">${mi(g.emp)}</td><td class="n">${fp(pct(g.emp,g.atu))}</td><td class="n">${mi(g.pago)}</td></tr>`).join("") : `<tr><td colspan="9" class="empty">Nada a agrupar.</td></tr>`) + `</tbody>`;
-  document.querySelectorAll("#brk tr.click").forEach(tr => { const go = () => { state.drill[dim] = tr.dataset.k; render(); }; tr.addEventListener("click", go); tr.addEventListener("keydown", e => { if (e.key==="Enter") go(); }); });
-}
-
-function renderRaw(rows){
-  const sorted = [...rows].sort((a,b)=>b.r[F.atu]-a.r[F.atu]), show = sorted.slice(0,300);
-  $("#raw").innerHTML = `<thead><tr><th>Dotação</th><th>Projeto / Atividade</th><th>Natureza</th><th>Crédito</th><th>Emenda</th><th class="n">Orçado</th><th class="n">Atualizado</th><th class="n">Empenhado</th><th class="n">Liquidado</th><th class="n">Pago</th><th class="n">% emp.</th></tr></thead><tbody>` +
-    show.map(o => { const r = o.r; return `<tr><td class="code">${o.code}</td><td>${esc(P.dict.pa[r[F.pa]]||"")}</td><td>${esc(P.dict.desp[r[F.desp]]||"")}</td><td>${r[F.tipo]}</td><td class="code">${esc(r[F.em]||"")}</td><td class="n">${brl(r[F.orc])}</td><td class="n">${brl(r[F.atu])}</td><td class="n">${brl(r[F.emp])}</td><td class="n">${brl(r[F.liq])}</td><td class="n">${brl(r[F.pago])}</td><td class="n">${fp(pct(r[F.emp],r[F.atu]))}</td></tr>`; }).join("") +
-    (sorted.length > 300 ? `<tr><td colspan="11" class="note">Mostrando as 300 maiores de ${sorted.length}. O botão copia todas.</td></tr>` : "") + `</tbody>`;
-  $("#raw").dataset.n = rows.length;
-}
-
-async function copyCSV(){
-  const rows = sel(), head = ["dotacao","orgao","programa","projeto_atividade","natureza","fonte","tipo_credito","emenda","orcado","suplementado","reduzido","atualizado","congelado","reservado","empenhado","liquidado","pago"];
-  const q = s => `"${String(s).replace(/"/g,'""')}"`;
-  const lines = [head.join(";")].concat(rows.map(o => { const r=o.r; return [o.code, q(P.dict.org[r[F.org]]), q(P.dict.prog[r[F.prog]]), q(P.dict.pa[r[F.pa]]), q(P.dict.desp[r[F.desp]]), q(P.dict.fonte[r[F.fonte]]), r[F.tipo], r[F.em], ...["orc","sup","red","atu","cong","res","emp","liq","pago"].map(k=>String(r[F[k]]).replace(".",","))].join(";"); }));
-  try { await navigator.clipboard.writeText(lines.join("\n")); $("#copymsg").textContent = `${rows.length} linhas copiadas (separador ;). Cole numa planilha.`; }
-  catch(e){ $("#copymsg").textContent = "O navegador bloqueou a cópia. Use os arquivos oficiais abaixo."; }
+/* ---------- COMO LER ---------- */
+function renderComoLer(){
+  const ex = "25.10.13.392.4032.6364.3.3.90.39.00.00";
+  $("#codeex").innerHTML = partes(ex).map(([l,c,x])=>`<div class="part"><div class="l">${l}</div><div class="c">${esc(c)}</div><div class="x">${esc(x||"")}</div></div>`).join("");
+  $("#ipcanote").textContent = `Na série histórica, a opção “R$ de hoje” multiplica o valor de cada ano pelo fator IPCA acumulado de dezembro daquele ano até ${IP.base.slice(5)}/${IP.base.slice(0,4)} (fonte: BCB/SGS 433). Assim, valores de anos diferentes ficam comparáveis em poder de compra.`;
 }
 </script>
 </body>
