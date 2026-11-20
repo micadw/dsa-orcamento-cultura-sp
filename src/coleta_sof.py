@@ -41,14 +41,25 @@ def obter_token() -> str:
                  "'Chaves de Produção' da APILib e ajuste SOF_TOKEN_URL.")
 
 
+_TOKEN = {"atual": None}
+
+
 def get(recurso: str, params: dict, token: str, tentativas: int = 4) -> dict:
+    """Repete só falhas temporárias (429/5xx). Num 401 (token expirado ou trocado), gera um
+    token novo uma única vez; não vale para SOF_TOKEN fixo."""
     url = f"{BASE}/{recurso}?{urllib.parse.urlencode(params)}"
+    renovou = False
     for i in range(tentativas):
-        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}", "Accept": "application/json"})
+        tk = _TOKEN["atual"] or token
+        req = urllib.request.Request(url, headers={"Authorization": f"Bearer {tk}", "Accept": "application/json"})
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
+            if e.code == 401 and not renovou and not os.environ.get("SOF_TOKEN"):
+                print("  401: gerando token novo e repetindo a página", file=sys.stderr)
+                _TOKEN["atual"], renovou = obter_token(), True
+                continue
             if e.code in (429, 500, 502, 503, 504) and i < tentativas - 1:
                 time.sleep(2 ** i * 2)          # espera exponencial: 2, 4, 8 s
                 continue
