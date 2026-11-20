@@ -83,8 +83,10 @@ def chave(r: dict, m: dict) -> str | None:
 
 
 def fonte(r: dict, m: dict) -> str:
+    """Fonte no padrão da SEPLAN (2 dígitos). A v4 traz o código novo de 10 dígitos
+    (ex.: 0015009001); os 2 primeiros são a fonte antiga (00 Tesouro, 02 transferências federais)."""
     d = digitos(r[m["fonte"]]) if m["fonte"] else ""
-    return d.zfill(2) if d else ""
+    return (d[:2] if len(d) > 2 else d.zfill(2)) if d else ""
 
 
 def credor(r: dict, m: dict) -> tuple[str, str]:
