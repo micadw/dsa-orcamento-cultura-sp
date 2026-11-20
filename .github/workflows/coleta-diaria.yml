@@ -24,7 +24,7 @@ jobs:
       - name: Empenhos (API-SOF v4)
         if: env.SOF_KEY != ''
         continue-on-error: true
-        run: python -m src.coleta_sof --orgaos 25 79 --saida data/empenhos
+        run: python -m src.coleta_sof --orgaos 25 79 85 15 --saida data/empenhos
       - name: Empenhos por dotação para a ficha (CPF mascarado, PF anonimizada)
         if: env.SOF_KEY != ''
         continue-on-error: true
