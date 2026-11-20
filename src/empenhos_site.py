@@ -153,6 +153,38 @@ def agregar(arquivos: list[Path], top: int = 10, ultimos: int = 15) -> dict:
     return {"n": total, "sem_chave": sem_chave, "dot": saida}
 
 
+def exportar_lista(arquivos: list[Path], pasta: Path) -> dict:
+    """Lista completa, um JSON por órgão (carregado sob demanda pelo site).
+    Formato: {"cred": [[nome, doc], ...], "rows": [[chave, fonte, num, data, i_cred, emp, liq, pago, processo], ...]}.
+    Nomes e documentos passam pela mesma anonimização da ficha (PF e MEI)."""
+    por_org = defaultdict(lambda: {"cred": [], "idx": {}, "rows": []})
+    for arq in arquivos:
+        with open(arq, encoding="utf-8") as f:
+            rd = csv.DictReader(f, delimiter=";")
+            m = mapear(rd.fieldnames or [])
+            for r in rd:
+                k = chave(r, m)
+                if not k:
+                    continue
+                o = por_org[k[:2]]
+                c = credor(r, m)
+                if c not in o["idx"]:
+                    o["idx"][c] = len(o["cred"]); o["cred"].append(list(c))
+                o["rows"].append([k, fonte(r, m), str(r[m["num"]]) if m["num"] else "",
+                                  _ordem_data(str(r[m["data"]])[:10]) if m["data"] else "", o["idx"][c],
+                                  round(num(r[m["emp"]]), 2) if m["emp"] else 0, round(num(r[m["liq"]]), 2) if m["liq"] else 0,
+                                  round(num(r[m["pago"]]), 2) if m["pago"] else 0, str(r[m["proc"]]) if m["proc"] else ""])
+    pasta.mkdir(parents=True, exist_ok=True)
+    resumo = {}
+    for org, o in por_org.items():
+        o["rows"].sort(key=lambda z: z[3], reverse=True)
+        arq = pasta / f"org{org}.json"
+        arq.write_text(json.dumps({"cred": o["cred"], "rows": o["rows"]}, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        resumo[org] = len(o["rows"])
+        print(f"→ {arq} ({len(o['rows'])} empenhos, {arq.stat().st_size/1e6:.1f} MB)")
+    return resumo
+
+
 def _ordem_data(s: str) -> str:
     """Aceita aaaa-mm-dd ou dd/mm/aaaa."""
     m = re.match(r"(\d{2})/(\d{2})/(\d{4})", s or "")
@@ -173,6 +205,7 @@ def main():
     res = agregar(arquivos)
     if not res["dot"]:
         sys.exit("Nenhuma dotação montada; veja o diagnóstico acima. JSON anterior mantido.")
+    res["listas"] = exportar_lista(arquivos, Path(a.saida).parent / "empenhos")
     res["extr"] = fotos[-1].name
     res["fonte_dados"] = "API-SOF v4 (APILib, Prefeitura de São Paulo)"
     Path(a.saida).write_text(json.dumps(res, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

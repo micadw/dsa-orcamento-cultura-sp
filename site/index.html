@@ -137,6 +137,7 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
     <a href="#inicio" data-view="inicio">Início</a>
     <a href="#explorar" data-view="explorar">Explorar dotações</a>
     <a href="#serie" data-view="serie">Série 2003–2026</a>
+    <a href="#empenhos" data-view="empenhos">Empenhos</a>
     <a href="#como-ler" data-view="como-ler">Como ler</a>
     <button type="button" id="tema" aria-pressed="false">Modo escuro</button>
   </div>
@@ -257,6 +258,22 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
   </section>
 </div>
 
+<!-- ============ EMPENHOS ============ -->
+<div class="view" id="v-empenhos">
+  <section>
+    <h2>Empenhos de 2026 por credor</h2>
+    <p class="lede" id="emp-lede">Todos os empenhos da API-SOF v4 nos órgãos da cultura. Busque por nome, CNPJ, número do empenho ou processo SEI.</p>
+    <div class="bar">
+      <div class="field"><label for="emp-org">Órgão</label><select id="emp-org"></select></div>
+      <div class="field grow"><label for="emp-q">Buscar</label><input id="emp-q" type="search" placeholder="ex.: associação, 12.345.678/0001-99, 6025.2026/…" autocomplete="off"></div>
+      <button type="button" class="ghost" id="emp-csv">Baixar CSV da busca</button>
+    </div>
+    <p class="note" id="emp-resumo"></p>
+    <div class="tblwrap"><table id="emp-tab"></table></div>
+    <p class="note">Pessoas físicas aparecem como “[pessoa física]”, com o CPF mascarado, e o nome do titular de MEI é omitido (LGPD). Clique na dotação para abrir a ficha.</p>
+  </section>
+</div>
+
 <!-- ============ COMO LER ============ -->
 <div class="view" id="v-como-ler">
   <section class="prose">
@@ -364,11 +381,12 @@ Promise.all(["data26.json","hist.json","ipca.json"].map(f=>fetch(f).then(r=>{ if
 /* ---------- roteamento por #hash ---------- */
 function route(){
   const h = location.hash.slice(1) || "inicio";
-  const view = h.startsWith("dot-") ? "ficha" : (["inicio","explorar","serie","como-ler"].includes(h) ? h : "inicio");
+  const view = h.startsWith("dot-") ? "ficha" : (["inicio","explorar","serie","empenhos","como-ler"].includes(h) ? h : "inicio");
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "v-"+view));
   document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.view !== (view==="ficha"?"explorar":view)) a.removeAttribute("aria-current"); else a.setAttribute("aria-current","page"); });
   if (view === "explorar") renderExplorar();
   if (view === "serie") renderHist();
+  if (view === "empenhos") renderEmpenhos();
   if (view === "ficha") renderFicha(unslug(h));
   window.scrollTo(0,0);
 }
@@ -543,6 +561,7 @@ function renderFicha(code){
       .map(a=>`<tr class="click" tabindex="0" data-c="${a.code}"><td class="code">${a.code}</td><td>${esc(P.dict.desp[a.desp])}</td><td class="n">${brl(a.atu)}</td><td class="n">${brl(a.emp)}</td><td class="n">${fp(pct(a.emp,a.atu))}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Nenhuma outra dotação nesta ação.</td></tr>`
     }</tbody></table></div>`;
   box.querySelectorAll("tr.click").forEach(tr => tr.addEventListener("click", () => location.hash = slug(tr.dataset.c)));
+  listaFicha();
   $("#share").addEventListener("click", async () => { try { await navigator.clipboard.writeText(location.href); $("#sharemsg").textContent = "Link copiado."; } catch(e){ $("#sharemsg").textContent = "Copie o endereço acima."; } });
 }
 
@@ -562,7 +581,7 @@ function blocoEmpenhos(code, s){
         d.cred.map(c=>`<tr><td>${esc(c[0])}</td><td class="code">${esc(fmtDoc(c[1]))}</td><td class="n">${brl(c[2])}</td><td class="n">${c[3]}</td></tr>`).join("")
       }</tbody></table></div>
       ${d.ncred>d.cred.length?`<p class="note">Mostrando os ${d.cred.length} maiores de ${d.ncred} credores.</p>`:""}
-    </div><div>
+    </div><div id="emp-ficha" data-k="${k}" data-fo="${porFonte ? fo : ""}">
       <h3>Empenhos mais recentes</h3>
       <div class="tblwrap"><table><thead><tr><th>Nº</th><th>Data</th><th>Credor</th><th class="n">Valor</th><th>Processo</th></tr></thead><tbody>${
         ult.map(u=>`<tr><td class="code">${esc(u[0])}</td><td>${esc(fmtData(u[1]))}</td><td>${esc(u[2])}</td><td class="n">${brl(u[3])}</td><td class="code">${esc(u[4])}</td></tr>`).join("") || `<tr><td colspan="5" class="empty">Sem empenhos nesta fonte.</td></tr>`
@@ -570,6 +589,60 @@ function blocoEmpenhos(code, s){
     </div></div>
     <p class="note">Pessoas físicas aparecem como “[pessoa física]”, com o CPF mascarado, e o nome do titular de MEI é omitido (LGPD). Os empenhos são ligados à dotação pelo órgão, unidade, função, subfunção, programa, projeto/atividade, natureza até o elemento e fonte.</p>`;
 }
+/* ---------- LISTA COMPLETA DE EMPENHOS (carregada sob demanda, um arquivo por órgão) ---------- */
+const LISTAS = {};
+const lista = org => LISTAS[org] || (LISTAS[org] = fetch(`empenhos/org${org}.json`).then(r => r.ok ? r.json() : null).catch(() => null));
+const linhaEmp = (L, r) => { const c = L.cred[r[4]]; return {k:r[0], fo:r[1], num:r[2], data:r[3], nome:c[0], doc:c[1], emp:r[5], liq:r[6], pago:r[7], proc:r[8]}; };
+const casa = (e, q) => !q || [e.nome, e.doc, fmtDoc(e.doc), e.num, e.proc].some(x => String(x||"").toLowerCase().includes(q));
+function csvEmp(arr, nome){
+  const q = s => `"${String(s??"").replace(/"/g,'""')}"`, n = v => String(v).replace(".",",");
+  const txt = ["data;empenho;credor;cnpj_cpf;dotacao_ate_elemento;fonte;empenhado;liquidado;pago;processo"].concat(arr.map(e => [e.data, e.num, q(e.nome), q(fmtDoc(e.doc)), e.k, e.fo, n(e.emp), n(e.liq), n(e.pago), q(e.proc)].join(";"))).join("\n");
+  try { const b = new Blob(["\ufeff"+txt], {type:"text/csv;charset=utf-8"}), a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = nome; document.body.appendChild(a); a.click(); a.remove(); } catch(e){}
+}
+const tabEmp = (arr, comDot) => `<thead><tr><th>Data</th><th>Nº</th><th>Credor</th><th>CNPJ / CPF</th>${comDot?"<th>Dotação</th>":""}<th class="n">Empenhado</th><th class="n">Liquidado</th><th class="n">Pago</th><th>Processo</th></tr></thead><tbody>${
+  arr.map(e => `<tr><td>${esc(fmtData(e.data))}</td><td class="code">${esc(e.num)}</td><td>${esc(e.nome)}</td><td class="code">${esc(fmtDoc(e.doc))}</td>${comDot?`<td class="code">${DOTK[e.k+"|"+e.fo]?`<a href="#${slug(DOTK[e.k+"|"+e.fo])}">${esc(e.k)}</a>`:esc(e.k)}</td>`:""}<td class="n">${brl(e.emp)}</td><td class="n">${brl(e.liq)}</td><td class="n">${brl(e.pago)}</td><td class="code">${esc(e.proc)}</td></tr>`).join("") || `<tr><td colspan="${comDot?9:8}" class="empty">Nenhum empenho encontrado.</td></tr>`}</tbody>`;
+let DOTK = {};  // chave até o elemento + fonte → código completo da dotação (para links)
+function credoresDe(arr){
+  const g = {}; arr.forEach(e => { const a = g[e.nome+"|"+e.doc] || (g[e.nome+"|"+e.doc] = {nome:e.nome, doc:e.doc, emp:0, n:0}); a.emp += e.emp; a.n++; });
+  return Object.values(g).sort((a,b) => b.emp - a.emp);
+}
+async function listaFicha(){
+  const box = document.getElementById("emp-ficha"); if (!box) return;
+  const k = box.dataset.k, fo = box.dataset.fo, L = await lista(k.slice(0,2));
+  if (!L || !document.body.contains(box)) return;
+  const todos = L.rows.filter(r => r[0] === k && (!fo || r[1] === fo)).map(r => linhaEmp(L, r));
+  box.innerHTML = `<h3>Todos os empenhos (${todos.length})</h3>
+    <div class="bar" style="margin-top:0"><div class="field grow"><label for="ef-q">Buscar nesta dotação</label><input id="ef-q" type="search" placeholder="credor, CNPJ, nº ou processo" autocomplete="off"></div>
+    <button type="button" class="ghost" id="ef-csv">Baixar CSV</button><button type="button" class="ghost" id="ef-cred">Ver todos os credores</button></div>
+    <div class="tblwrap" style="max-height:520px;overflow:auto"><table id="ef-tab"></table></div><p class="note" id="ef-n"></p>`;
+  let modo = "emp";
+  const pinta = () => { const q = $("#ef-q").value.trim().toLowerCase(), arr = todos.filter(e => casa(e, q));
+    if (modo === "emp") { $("#ef-tab").innerHTML = tabEmp(arr, false); $("#ef-n").textContent = `${arr.length} de ${todos.length} empenhos.`; }
+    else { const cr = credoresDe(arr); $("#ef-tab").innerHTML = `<thead><tr><th>Credor</th><th>CNPJ / CPF</th><th class="n">Empenhado</th><th class="n">Empenhos</th></tr></thead><tbody>${cr.map(c=>`<tr><td>${esc(c.nome)}</td><td class="code">${esc(fmtDoc(c.doc))}</td><td class="n">${brl(c.emp)}</td><td class="n">${c.n}</td></tr>`).join("")}</tbody>`; $("#ef-n").textContent = `${cr.length} credores.`; } };
+  $("#ef-q").addEventListener("input", pinta);
+  $("#ef-cred").addEventListener("click", () => { modo = modo === "emp" ? "cred" : "emp"; $("#ef-cred").textContent = modo === "emp" ? "Ver todos os credores" : "Ver todos os empenhos"; pinta(); });
+  $("#ef-csv").addEventListener("click", () => csvEmp(todos.filter(e => casa(e, $("#ef-q").value.trim().toLowerCase())), `empenhos_${k.replace(/\./g,"-")}${fo?"_f"+fo:""}.csv`));
+  pinta();
+}
+async function renderEmpenhos(){
+  const sel = $("#emp-org");
+  if (!E || !E.listas) { $("#emp-resumo").textContent = "A lista de empenhos ainda não foi gerada pela coleta."; return; }
+  if (!sel.options.length) {
+    sel.innerHTML = Object.keys(E.listas).sort().map(o => `<option value="${o}">${esc(o)} · ${esc((P.dict.org||{})[o]||"")} (${E.listas[o]})</option>`).join("");
+    sel.addEventListener("change", renderEmpenhos);
+    let t; $("#emp-q").addEventListener("input", () => { clearTimeout(t); t = setTimeout(renderEmpenhos, 200); });
+    $("#emp-csv").addEventListener("click", async () => { const L = await lista(sel.value); if (L) csvEmp(L.rows.map(r => linhaEmp(L, r)).filter(e => casa(e, $("#emp-q").value.trim().toLowerCase())), `empenhos_org${sel.value}_${E.extr}.csv`); });
+    DOTK = {}; ROWS.forEach(o => { const p = o.code.split("."); DOTK[p.slice(0,10).join(".")+"|"+p[11]] = o.code; });
+  }
+  $("#emp-lede").textContent = `Todos os empenhos da API-SOF v4 nos órgãos da cultura (foto de ${E.extr}). Busque por nome, CNPJ, número do empenho ou processo SEI.`;
+  $("#emp-resumo").textContent = "Carregando…";
+  const L = await lista(sel.value); if (!L) { $("#emp-resumo").textContent = "Não foi possível carregar a lista deste órgão."; return; }
+  const q = $("#emp-q").value.trim().toLowerCase(), arr = L.rows.map(r => linhaEmp(L, r)).filter(e => casa(e, q)), mostra = arr.slice(0, 500);
+  const tot = arr.reduce((a,e) => a + e.emp, 0), ncred = new Set(arr.map(e => e.nome+"|"+e.doc)).size;
+  $("#emp-resumo").textContent = `${arr.length} empenhos · ${ncred} credores · ${brl(tot)} empenhados.` + (arr.length > 500 ? ` Mostrando os 500 mais recentes; o CSV traz todos.` : "");
+  $("#emp-tab").innerHTML = tabEmp(mostra, true);
+}
+
 const fmtDoc = d => /^\d{14}$/.test(d) ? d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,"$1.$2.$3/$4-$5") : (d||"—");
 const fmtData = d => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d||""); return m ? `${m[3]}/${m[2]}/${m[1]}` : (d||""); };
 
