@@ -92,6 +92,11 @@ svg text{fill:var(--ink-2);font-family:var(--f-body);font-size:11px}
 table{border-collapse:collapse;width:100%;font-size:.84rem}
 th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 th{font-weight:600;color:var(--ink-2);background:var(--bg);position:sticky;top:0;white-space:nowrap}
+th.ord{cursor:pointer;user-select:none}
+th.ord:hover{color:var(--accent)}
+th.ord::after{content:" ↕";color:var(--ink-3);font-weight:400;font-size:.75em}
+th[aria-sort="ascending"]::after{content:" ▲";color:var(--accent)}
+th[aria-sort="descending"]::after{content:" ▼";color:var(--accent)}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.code{font-family:var(--f-mono);font-size:.78rem;white-space:nowrap;color:var(--ink-2)}
 tr.click{cursor:pointer} tr.click:hover td{background:var(--accent-soft)}
@@ -304,6 +309,29 @@ const VALS = ["orc","sup","red","atu","cong","res","emp","liq","pago"];
   b.addEventListener("click", () => { const t = escuro() ? "light" : "dark"; root.dataset.theme = t; try { localStorage.setItem("tema", t); } catch(e){} pinta(); if (typeof route === "function" && P) route(); });
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", pinta);
   pinta();
+})();
+/* Ordenação de qualquer tabela: clique (ou Enter) no título da coluna alterna crescente/decrescente.
+   Entende datas dd/mm/aaaa, valores em R$ (com mi/bi), percentuais e texto (A–Z em português). */
+(function(){
+  const chave = t => { t = (t||"").trim();
+    let m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(t); if (m) return +(m[3]+m[2]+m[1]);
+    m = /^(−|-)?\s*(R\$)?\s*(−|-)?\s*([\d.]+(,\d+)?)\s*(mi|bi|%)?$/.exec(t);
+    if (m) { let v = parseFloat(m[4].replace(/\./g,"").replace(",", ".")); if (m[6]==="mi") v*=1e6; if (m[6]==="bi") v*=1e9; return (m[1]||m[3]) ? -v : v; }
+    return t === "—" || t === "" ? null : t.toLocaleLowerCase("pt-BR"); };
+  const ordenar = th => {
+    const tr = th.parentElement, tbl = th.closest("table"), tb = tbl.tBodies[0]; if (!tb) return;
+    const i = [...tr.children].indexOf(th), n = tr.children.length;
+    const dir = th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending", s = dir === "ascending" ? 1 : -1;
+    tr.querySelectorAll("th").forEach(x => x.removeAttribute("aria-sort")); th.setAttribute("aria-sort", dir);
+    const linhas = [...tb.rows], dados = linhas.filter(r => r.cells.length === n), resto = linhas.filter(r => r.cells.length !== n);
+    dados.sort((a,b) => { const x = chave(a.cells[i].textContent), y = chave(b.cells[i].textContent);
+      if (x === null) return 1; if (y === null) return -1;
+      return (typeof x === "number" && typeof y === "number") ? (x-y)*s : String(x).localeCompare(String(y),"pt-BR",{numeric:true})*s; });
+    dados.concat(resto).forEach(r => tb.appendChild(r)); };
+  const marcar = () => document.querySelectorAll("thead th").forEach(th => { if (th.textContent.trim() && !th.classList.contains("ord")) { th.classList.add("ord"); th.tabIndex = 0; th.title = "Clique para ordenar"; } });
+  document.addEventListener("click", e => { const th = e.target.closest("th.ord"); if (th) ordenar(th); });
+  document.addEventListener("keydown", e => { const th = e.target.closest && e.target.closest("th.ord"); if (th && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ordenar(th); } });
+  new MutationObserver(marcar).observe(document.body, {childList:true, subtree:true}); marcar();
 })();
 let P, H, IP, E = null, ROWS = [], state = {q:"", org:"25", tipo:"", drill:{}, ent:"SMC", mode:"real", dim:"prog"};
 const $ = s => document.querySelector(s);
