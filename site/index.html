@@ -7,6 +7,7 @@
 <meta name="description" content="Consulta pública da execução orçamentária da cultura na Prefeitura de São Paulo por código de dotação, com dados abertos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+<script>try{const t=localStorage.getItem("tema");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t;}catch(e){}</script>
 <style>
 :root{
   /* Layout: cabeçalho + abas (Início · Explorar · Série · Como ler) → conteúdo da vista; ficha da dotação abre por #dot-… */
@@ -37,6 +38,8 @@ h1{font-family:var(--f-display);font-weight:600;font-size:1.7rem;margin:0 0 4px;
 nav.tabs{position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
 nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto}
 nav.tabs a{padding:12px 14px;color:var(--ink-2);text-decoration:none;font-weight:500;border-bottom:3px solid transparent;white-space:nowrap}
+#tema{margin-left:auto;align-self:center;background:var(--surface);color:var(--ink-2);border-color:var(--line);font-weight:500;font-size:.85rem;padding:6px 10px;white-space:nowrap}
+#tema:hover{color:var(--accent);border-color:var(--accent)}
 nav.tabs a[aria-current="page"]{color:var(--accent);border-bottom-color:var(--accent)}
 .view{display:none}.view.on{display:block}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:14px 0 4px}
@@ -130,6 +133,7 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
     <a href="#explorar" data-view="explorar">Explorar dotações</a>
     <a href="#serie" data-view="serie">Série 2003–2026</a>
     <a href="#como-ler" data-view="como-ler">Como ler</a>
+    <button type="button" id="tema" aria-pressed="false">Modo escuro</button>
   </div>
 </nav>
 
@@ -292,6 +296,15 @@ footer{color:var(--ink-3);font-size:.8rem;padding:10px 0 30px}
 <script>
 const F = {org:0,uni:1,fun:2,sub:3,prog:4,pa:5,desp:6,fonte:7,em:8,tipo:9,orc:10,sup:11,red:12,atu:13,cong:14,res:15,emp:16,liq:17,pago:18};
 const VALS = ["orc","sup","red","atu","cong","res","emp","liq","pago"];
+/* Botão de tema: alterna claro/escuro e lembra a escolha neste navegador. Sem escolha, segue o sistema. */
+(function(){
+  const b = document.getElementById("tema"), root = document.documentElement;
+  const escuro = () => root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  const pinta = () => { const d = escuro(); b.textContent = d ? "☀ Modo claro" : "☾ Modo escuro"; b.setAttribute("aria-pressed", String(d)); b.title = d ? "Mudar para o modo claro" : "Mudar para o modo escuro"; };
+  b.addEventListener("click", () => { const t = escuro() ? "light" : "dark"; root.dataset.theme = t; try { localStorage.setItem("tema", t); } catch(e){} pinta(); if (typeof route === "function" && P) route(); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", pinta);
+  pinta();
+})();
 let P, H, IP, E = null, ROWS = [], state = {q:"", org:"25", tipo:"", drill:{}, ent:"SMC", mode:"real", dim:"prog"};
 const $ = s => document.querySelector(s);
 const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0});
