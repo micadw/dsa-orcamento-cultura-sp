@@ -9,5 +9,7 @@ authors:
 version: "0.1.0"
 date-released: 2026-11-20
 license: MIT
+doi: "10.5281/zenodo.24399304"
+url: "https://micadw.github.io/dsa-orcamento-cultura-sp/"
 repository-code: "https://github.com/micadw/dsa-orcamento-cultura-sp"
 keywords: [orçamento público, execução orçamentária, política cultural, dados abertos, São Paulo]

@@ -1,5 +1,7 @@
 # Orçamento da Cultura em São Paulo — da proposta ao pagamento
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24399304.svg)](https://doi.org/10.5281/zenodo.24399304) · **Site:** https://micadw.github.io/dsa-orcamento-cultura-sp/
+
 > **Status:** em andamento · piloto (sprint 1)
 
 Piloto de site para acesso e visualização dos dados públicos de planejamento, empenho e execução orçamentária da Prefeitura de São Paulo, com busca pelo **código da dotação**, resumos estatísticos, taxas de execução, série histórica 2003–2026 e acesso aos dados brutos. Estudo de caso: **Secretaria Municipal de Cultura (órgão 25)**, Fundo Municipal de Cultura (79) e a função 13 (Cultura) em todos os órgãos.
@@ -34,7 +36,7 @@ Projeto pessoal com dados abertos; não representa posição oficial da PMSP. Ne
 
 ## Licença e citação
 
-Código sob [MIT](LICENSE). Dados tratados, site, figuras e textos sob [CC BY 4.0](LICENSE-DATA.md). Para citar, use o arquivo [`CITATION.cff`](CITATION.cff) (botão "Cite this repository" no GitHub).
+Código sob [MIT](LICENSE). Dados tratados, site, figuras e textos sob [CC BY 4.0](LICENSE-DATA.md). Para citar, use o arquivo [`CITATION.cff`](CITATION.cff) (botão "Cite this repository" no GitHub) ou o DOI de todas as versões [10.5281/zenodo.24399304](https://doi.org/10.5281/zenodo.24399304) (v0.1.0: [10.5281/zenodo.24399305](https://doi.org/10.5281/zenodo.24399305)).
 
 ---
 
