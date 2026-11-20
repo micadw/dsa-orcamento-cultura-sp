@@ -1,0 +1,36 @@
+{
+  "profile": "fiscal-data-package",
+  "name": "orcamento-cultura-pmsp",
+  "title": "Execução orçamentária da Cultura — Prefeitura de São Paulo",
+  "description": "Recorte da função 13 (Cultura) e órgãos 15, 25, 79, 85, 88, 95 e 97 da base de execução orçamentária da SEPLAN/PMSP.",
+  "countryCode": "BR",
+  "fiscalPeriod": {"start": "2026-01-01", "end": "2026-12-31"},
+  "sources": [{"title": "SEPLAN/PMSP — Base de Dados da Execução Orçamentária", "path": "https://prefeitura.sp.gov.br/web/planejamento/w/execucao_orcamentaria"}],
+  "licenses": [{"name": "CC-BY-4.0", "title": "Creative Commons Attribution 4.0 (tratamento); dados originais conforme a fonte"}],
+  "resources": [{
+    "name": "execucao-2026",
+    "path": "../site/data26.json",
+    "format": "json",
+    "schema": {"fields": [
+      {"name": "orgao", "type": "string", "columnType": "administrative-classification:generic:level1:code"},
+      {"name": "unidade", "type": "string", "columnType": "administrative-classification:generic:level2:code"},
+      {"name": "funcao", "type": "string", "columnType": "functional-classification:generic:level1:code"},
+      {"name": "subfuncao", "type": "string", "columnType": "functional-classification:generic:level2:code"},
+      {"name": "programa", "type": "string", "columnType": "activity:generic:program:code"},
+      {"name": "projeto_atividade", "type": "string", "columnType": "activity:generic:project:code"},
+      {"name": "natureza", "type": "string", "columnType": "economic-classification:generic:level4:code"},
+      {"name": "fonte", "type": "string", "columnType": "fin-source:generic:level1:code"},
+      {"name": "emenda", "type": "string"},
+      {"name": "tipo_credito", "type": "string"},
+      {"name": "orcado", "type": "number", "columnType": "value", "phase": "approved"},
+      {"name": "suplementado", "type": "number"},
+      {"name": "reduzido", "type": "number"},
+      {"name": "atualizado", "type": "number", "columnType": "value", "phase": "adjusted"},
+      {"name": "congelado", "type": "number"},
+      {"name": "reservado", "type": "number"},
+      {"name": "empenhado", "type": "number", "columnType": "value", "phase": "committed"},
+      {"name": "liquidado", "type": "number", "columnType": "value", "phase": "executed"},
+      {"name": "pago", "type": "number", "columnType": "value", "phase": "paid"}
+    ]}
+  }]
+}

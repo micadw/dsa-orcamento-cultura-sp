@@ -1,0 +1,12 @@
+data/raw/
+data/empenhos/
+dados/
+*.parquet
+.env
+.env.*
+*.key
+__pycache__/
+.ipynb_checkpoints/
+.DS_Store
+_site/
+.quarto/

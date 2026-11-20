@@ -1,0 +1,29 @@
+---
+title: "Do aprovado ao executado: o orçamento da cultura em São Paulo (2003–2026)"
+author: "Amilcar Ferraz Farina (Mica)"
+lang: pt-BR
+bibliography: refs.bib
+format:
+  html: default
+  docx: default
+---
+
+## Introdução
+
+<!-- Problema: o debate público concentra-se no valor aprovado na LOA; pouco se acompanha a trajetória até o pagamento. -->
+
+## Referencial
+
+<!-- Transparência orçamentária e dados abertos [@craveiro2020cuidando]; séries históricas municipais e deflação [@carvalho2022series]. -->
+
+## Dados e método
+
+<!-- Bases SEPLAN 2003–2026; API-SOF v4; decretos de crédito; emendas (Câmara). Indicadores: taxas orçado→atualizado→empenhado→pago; valores reais (IPCA). -->
+
+## Resultados
+
+## Discussão
+
+## Conclusão
+
+*Aviso: projeto pessoal com dados abertos; não representa posição oficial da PMSP.*

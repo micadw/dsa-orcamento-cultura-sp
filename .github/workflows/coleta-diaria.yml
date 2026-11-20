@@ -1,0 +1,36 @@
+name: coleta-diaria
+on:
+  schedule:
+    - cron: "17 10 * * 1-5"   # 07:17 em São Paulo, dias úteis
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  coleta:
+    runs-on: ubuntu-latest
+    env:
+      SOF_KEY: ${{ secrets.SOF_KEY }}
+      SOF_SECRET: ${{ secrets.SOF_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Bases abertas da SEPLAN
+        run: python -m src.coleta_seplan
+      - name: Empenhos (API-SOF v4)
+        if: env.SOF_KEY != ''
+        run: python -m src.coleta_sof --orgaos 25 79 --saida data/empenhos
+      - name: Guardar foto diária dos empenhos (fora do git, 90 dias)
+        if: env.SOF_KEY != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: empenhos-${{ github.run_id }}
+          path: data/empenhos/
+          retention-days: 90
+      - name: Commit dos JSON do site
+        run: |
+          git config user.name "coleta-bot"
+          git config user.email "coleta-bot@users.noreply.github.com"
+          git add site/*.json
+          git diff --cached --quiet || git commit -m "chore(dados): atualização diária $(date +%F)"
+          git push
