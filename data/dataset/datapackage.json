@@ -137,7 +137,7 @@
       "path": "serie_2003_2026.csv",
       "format": "csv",
       "encoding": "utf-8",
-      "description": "Totais anuais: SMC = órgão 25; F13 = função Cultura em todos os órgãos; FMC = órgão 79. Valores nominais e reais (IPCA, base 2026-10)."
+      "description": "Totais anuais: SMC = órgão 25; F13 = função Cultura em todos os órgãos; FMC = órgão 79. Nominais e reais (IPCA, base 2026-10)."
     },
     {
       "name": "ipca-fatores",

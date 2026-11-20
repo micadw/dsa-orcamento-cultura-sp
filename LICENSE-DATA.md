@@ -9,4 +9,4 @@ indique a fonte (este repositório ou o DOI do Zenodo) e informe se fez alteraç
 
 Os dados de origem seguem as licenças e termos das fontes: Dados Abertos da Prefeitura de São Paulo
 (SEPLAN — execução orçamentária), API-SOF da Secretaria Municipal da Fazenda (Termos de Uso da APILib),
-Câmara Municipal de São Paulo e Diário Oficial da Cidade. Dados pessoais de credores pessoa física são mascarados (LGPD).
+Câmara Municipal de São Paulo e Diário Oficial da Cidade. Por minimização (LGPD), o CPF de credores e nomes de pessoa física em descrições de ações orçamentárias são mascarados.

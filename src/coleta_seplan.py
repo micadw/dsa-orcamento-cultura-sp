@@ -8,7 +8,7 @@ Só biblioteca padrão. Uso:
     python -m src.coleta_seplan               # ano corrente, recorte Cultura
     python -m src.coleta_seplan --bruto data/raw   # também guarda os CSV originais
 """
-import argparse, csv, datetime as dt, io, json, urllib.request
+import argparse, csv, datetime as dt, io, json, re, urllib.request
 from pathlib import Path
 
 BASE = "https://prefeitura.sp.gov.br/cidade/secretarias/upload/seplan/arquivos/Exercicio_{ano}/"
@@ -47,6 +47,22 @@ def num(s: str) -> float:
         return 0.0
 
 
+# LGPD (minimização): nomes de pessoa física em descrições de ações ("Organização: Fulana de Tal")
+# são substituídos; pessoas jurídicas (associação, instituto, coletivo etc.) são mantidas.
+_RE_ORG = re.compile(r"((?:Organiza[çc][ãa]o|Proponente|Organizador[a]?|Realiza[çc][ãa]o)\s*:\s*)([^.;\"]+)", re.I)
+_PJ = re.compile(r"\b(associa[çc][ãa]o|instituto|coletivo|grupo|cia\.?|companhia|funda[çc][ãa]o|cooperativa|ltda|eireli|"
+                 r"\bme\b|mei|s/?a|sociedade|centro|movimento|federa[çc][ãa]o|sindicato|clube|n[úu]cleo|rede|uni[ãa]o|"
+                 r"academia|escola|universidade|ong|oscip|produ[çc][õo]es|editora|teatro|banda|orquestra|festival)\b", re.I)
+MASCARA_PF = "[pessoa física]"
+
+
+def mascarar_pf(desc: str) -> str:
+    """Substitui nomes de pessoa física após 'Organização:' (e similares) por [pessoa física]."""
+    if not desc:
+        return desc
+    return _RE_ORG.sub(lambda m: m.group(1) + (m.group(2) if _PJ.search(m.group(2)) else MASCARA_PF), desc)
+
+
 def ler(texto: str):
     return csv.DictReader(io.StringIO(texto), delimiter=";")
 
@@ -61,7 +77,7 @@ def pacote_ano(texto: str) -> dict:
     dic = {k: {} for k in DICTS}
     for r in sel:
         for k, (c, d) in DICTS.items():
-            dic[k][r[c]] = r[d]
+            dic[k][r[c]] = mascarar_pf(r[d])
     data = [[r[c] or "" for c in CAMPOS] + [num(r[v]) for v in VALORES] for r in sel]
     p = linhas[0] if linhas else {}
     return {"extr": p.get("DataExtracao"), "ini": p.get("DataInicial"), "fim": p.get("DataFinal"),
